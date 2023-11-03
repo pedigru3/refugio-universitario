@@ -2,27 +2,38 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
-  const data = { teste: "teste" };
-
   const users = await prisma.user.findMany();
-  return Response.json({ users, data }, { status: 200 });
+
+  return Response.json({ users }, { status: 200 });
 }
 
 export async function POST(req: Request) {
-  const { name, username, last_name } = await req.json();
+  const { name, username } = await req.json();
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      last_name,
-      username,
-    },
-  });
+  try {
+    const userAlreadyExists = await prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
 
-  cookies().set("@refugiouniversitario:userId", user.id, {
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
+    if (userAlreadyExists) {
+      return Response.json({ error: "user already exists" }, { status: 400 });
+    }
 
-  const data = { teste: "teste" };
-  return Response.json({ data }, { status: 201 });
+    const user = await prisma.user.create({
+      data: {
+        name,
+        username: username.toLowerCase(),
+      },
+    });
+
+    cookies().set("@refugiouniversitario:userId", user.id, {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return Response.json({}, { status: 201 });
+  } catch (error) {
+    return Response.json({ error: `${error}` }, { status: 400 });
+  }
 }
