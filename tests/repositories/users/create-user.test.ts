@@ -6,6 +6,5 @@ describe('repositories: create user', () => {
       name: 'Felipe',
       username: 'Pedigru',
     })
-    console.log(result)
   })
 })

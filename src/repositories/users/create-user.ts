@@ -12,5 +12,4 @@ export async function createUser({ name, username }: UserProps) {
     method: 'post',
     body: JSON.stringify(body),
   })
-  console.log(result.status)
 }

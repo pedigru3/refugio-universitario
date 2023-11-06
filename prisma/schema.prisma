@@ -26,14 +26,14 @@ model User {
 }
 
 model Account {
-  id                  String    @id @default(cuid())
-  user_id             String
-  providerType        String
-  provider_id         String
-  provider_account_id String
-  refreshToken        String?
-  accessToken         String?
-  accessTokenExpires  DateTime?
+  id                   String    @id @default(cuid())
+  user_id              String
+  provider_type        String
+  provider_id          String
+  provider_account_id  String
+  refresh_token        String?
+  access_token         String?
+  access_token_expires DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -49,7 +49,6 @@ model Session {
   user_id       String
   expires       DateTime
   session_token String   @unique
-  access_token  String   @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
