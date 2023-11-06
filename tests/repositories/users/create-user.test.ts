@@ -1,11 +1,11 @@
-import { createUser } from "@/repositories/users/create-user";
+import { createUser } from '@/repositories/users/create-user'
 
-describe("repositories: create user", () => {
-  it("shold be return all users", async () => {
+describe('repositories: create user', () => {
+  it('shold be return all users', async () => {
     const result = await createUser({
-      name: "Felipe",
-      username: "Pedigru",
-    });
-    console.log(result);
-  });
-});
+      name: 'Felipe',
+      username: 'Pedigru',
+    })
+    console.log(result)
+  })
+})

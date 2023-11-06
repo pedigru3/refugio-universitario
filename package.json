@@ -11,12 +11,16 @@
     "test:watch": "jest --watchAll"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
+    "@phosphor-icons/react": "^2.0.14",
     "@prisma/client": "^5.5.2",
     "@types/node-fetch": "^2.6.8",
     "next": "14.0.0",
     "next-auth": "^4.24.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-hook-form": "^7.47.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.1.0",

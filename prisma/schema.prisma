@@ -11,10 +11,50 @@ model User {
   id              String  @id @default(uuid())
   username        String  @unique
   name            String
-  course          String?
-  education_level String?
+  course          String
+  education_level String
+  email           String? @unique
+  avatar_url      String?
 
   created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
 
   @@map("users")
+}
+
+model Account {
+  id                  String    @id @default(cuid())
+  user_id             String
+  providerType        String
+  provider_id         String
+  provider_account_id String
+  refreshToken        String?
+  accessToken         String?
+  accessTokenExpires  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@unique([provider_id, provider_account_id])
+  @@map("accounts")
+}
+
+model Session {
+  id            String   @id @default(cuid())
+  user_id       String
+  expires       DateTime
+  session_token String   @unique
+  access_token  String   @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("sessions")
 }
