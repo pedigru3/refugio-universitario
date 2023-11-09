@@ -19,8 +19,9 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  accounts Account[]
-  sessions Session[]
+  accounts   Account[]
+  sessions   Session[]
+  Scheduling Scheduling[]
 
   @@map("users")
 }
@@ -56,4 +57,26 @@ model Session {
   user User @relation(fields: [user_id], references: [id])
 
   @@map("sessions")
+}
+
+model Scheduling {
+  id         String   @id @default(uuid())
+  date       DateTime
+  chair      Int
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id])
+  table Table @relation(fields: [table_id], references: [id])
+
+  user_id  String
+  table_id String
+
+  @@index([user_id])
+  @@map("schedulings")
+}
+
+model Table {
+  id String @id @default(uuid())
+
+  Scheduling Scheduling[]
 }

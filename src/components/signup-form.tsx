@@ -8,8 +8,9 @@ import { CustomSelect } from './custom-select'
 import { courses } from '@/consts/courses'
 import { FormAnnotation } from './form-annotation'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, redirect } from 'next/navigation'
 import { Button } from './button'
+import { useSession } from 'next-auth/react'
 
 const signUpFormSchema = z.object({
   name: z.string().min(3, { message: 'O nome deve ter ao menos 3 letras' }),
@@ -31,6 +32,12 @@ const signUpFormSchema = z.object({
 type SignUpFormData = z.infer<typeof signUpFormSchema>
 
 export function SignUpForm() {
+  const session = useSession()
+  const isSignIn = session.status === 'authenticated'
+  if (isSignIn) {
+    redirect('/agendamento/calendario')
+  }
+
   const {
     register,
     handleSubmit,

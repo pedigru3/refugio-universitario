@@ -1,5 +1,7 @@
 'use client'
 
+import { Calendar } from '@/components/calendar/calendar'
+import { Container } from '@/components/container'
 import { useSession } from 'next-auth/react'
 
 export default function SuccessSignUp() {
@@ -17,6 +19,9 @@ export default function SuccessSignUp() {
         Seja muito bem-vindo ao Refúgio Universitário. Agora é só você marcar a
         melhor data para iniciar os seus estudos.
       </p>
+      <div className="mt-5 max-w-[540px]">
+        <Calendar />
+      </div>
     </div>
   )
 }

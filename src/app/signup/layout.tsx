@@ -36,7 +36,7 @@ export default function SignUpLayout({
               }`}
             ></div>
           </div>
-          <div>{children}</div>
+          <div className="max-w-[670px]">{children}</div>
         </Container>
       </div>
     </div>
