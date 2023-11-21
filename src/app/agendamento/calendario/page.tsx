@@ -2,23 +2,32 @@
 
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
-import { TableIcon } from '@/components/table-icon'
 import { TimePickerItem } from '@/components/time-picker-item'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedHour, setSelectedHour] = useState<number | null>(null)
+  const avaliableHours = useRef([])
 
   const isDateSelected = !!selectedDate
-  const isTimeSelected = false
+  const isTimeSelected = true
 
   const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
   const describeDate = selectedDate
     ? dayjs(selectedDate).format('DD[ de ]MMMM')
     : null
 
-  function handleSelectedDate(date: Date) {
+  async function handleSelectedDate(date: Date) {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const responseTime = await fetch(
+      `/api/v1/availability?date=${year}-${month}-${day}`,
+    )
+    const timeData = await responseTime.json()
+    avaliableHours.current = timeData.availability
     setSelectedDate(date)
   }
 
@@ -50,17 +59,11 @@ export default function Calendario() {
               last:mb-6
               "
             >
-              <TimePickerItem>08:00</TimePickerItem>
-              <TimePickerItem>09:00</TimePickerItem>
-              <TimePickerItem>10:00</TimePickerItem>
-              <TimePickerItem>11:00</TimePickerItem>
-              <TimePickerItem>12:00</TimePickerItem>
-              <TimePickerItem>13:00</TimePickerItem>
-              <TimePickerItem>14:00</TimePickerItem>
-              <TimePickerItem>15:00</TimePickerItem>
-              <TimePickerItem>16:00</TimePickerItem>
-              <TimePickerItem>17:00</TimePickerItem>
-              <TimePickerItem>18:00</TimePickerItem>
+              {avaliableHours.current.map((time) => {
+                return (
+                  <TimePickerItem key={time}>{`${time}:00`}</TimePickerItem>
+                )
+              })}
             </div>
           </div>
         )}
@@ -68,9 +71,7 @@ export default function Calendario() {
       {isTimeSelected && (
         <div className="bg-zinc-800 mt-5 rounded-md box-border max-w-[540px] lg:max-w-[800px]">
           <p className="mx-5 pt-5">Reserve seu lugar:</p>
-          <div className="flex items-center justify-center">
-            <TableIcon />
-          </div>
+          <div className="flex items-center justify-center"></div>
         </div>
       )}
     </Container>

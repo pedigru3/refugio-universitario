@@ -59,14 +59,25 @@ model Session {
   @@map("sessions")
 }
 
+model Table {
+  id          String @id @default(uuid())
+  table_name  String
+  chair_count Int
+
+  created_at DateTime @default(now())
+
+  schedulings Scheduling[]
+
+  @@map("tables")
+}
+
 model Scheduling {
   id         String   @id @default(uuid())
   date       DateTime
-  chair      Int
   created_at DateTime @default(now())
 
-  user  User  @relation(fields: [user_id], references: [id])
   table Table @relation(fields: [table_id], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
 
   user_id  String
   table_id String
@@ -75,8 +86,12 @@ model Scheduling {
   @@map("schedulings")
 }
 
-model Table {
-  id String @id @default(uuid())
+model AvailableSchedule {
+  week_day              Int @unique
+  time_start_in_minutes Int
+  time_end_in_minutes   Int
 
-  Scheduling Scheduling[]
+  final_day DateTime?
+
+  @@map("available_schedules")
 }

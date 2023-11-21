@@ -1,21 +1,12 @@
 'use client'
 
 import { Header } from '@/components/header'
-import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
 
 export default function SignUpLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = useSession()
-  const isSignIn = session.status === 'authenticated'
-
-  if (!isSignIn) {
-    redirect('/')
-  }
-
   return (
     <div className="bg-purple-700 h-screen">
       <Header />

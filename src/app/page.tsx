@@ -23,8 +23,10 @@ export default async function Home() {
             />
           </figure>
           <Container>
-            <h1 className="text-3xl md:text-6xl py-3">Refúgio universitário</h1>
-            <p className="py-1 leading-relaxed">
+            <h1 className="text-3xl md:text-6xl py-3 text-white">
+              Refúgio universitário
+            </h1>
+            <p className="py-1 leading-relaxed text-white">
               Um ambiente onde universitários são acolhidos e apoiados em suas
               jornadas acadêmicas.
             </p>
