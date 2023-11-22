@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
 
   if (isPastDate) {
     return Response.json({
-      availability: [],
+      possibleTimes: [],
+      availableTimes: [],
       message: 'the date received is old',
     })
   }
@@ -37,7 +38,8 @@ export async function GET(request: NextRequest) {
 
   if (!availableSchedule) {
     return Response.json({
-      availability: [],
+      possibleTimes: [],
+      availableTimes: [],
       message: 'Day not released',
     })
   }
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
     return startHour + i
   })
 
-  const possibleBlockedTimes = await Promise.all(
+  /* const possibleBlockedTimes = await Promise.all(
     possibleTimes.map(async (time) => {
       const result = await fetch(
         `http://localhost:3000/api/v1/availability/table?date=${date}&hour=${time}`,
@@ -70,9 +72,47 @@ export async function GET(request: NextRequest) {
         return time
       }
     }),
+  ) */
+
+  const blockedHoursRaw: Array<{ hour: number }> = await prisma.$queryRaw`
+    WITH TotalTables AS (
+      SELECT
+        SUM(chair_count) AS chairs
+      FROM
+        tables
+    )
+
+    SELECT
+      EXTRACT(HOUR FROM S.date) AS hour,
+      COUNT(S.date) AS amount,
+      TT.chairs AS size
+    FROM schedulings S
+
+    LEFT JOIN available_schedules AVS
+      ON AVS.week_day = EXTRACT(DOW FROM S.date)
+
+    LEFT JOIN tables TB
+      ON TB.id = S.table_id
+
+    CROSS JOIN TotalTables TT
+
+    WHERE TO_CHAR(S.date, 'YYYY-MM-DD') 
+      = ${`${referenceDate.format('YYYY-MM-DD')}`}
+
+    GROUP BY EXTRACT(HOUR FROM S.date),
+    TB.chair_count,
+    TT.chairs
+
+    HAVING
+      COUNT(S.date) >= TT.chairs
+  `
+
+  // Aqui foi ajustado manualmente o fuso horário (-3 horas)
+  const blockedHours = blockedHoursRaw.map((item) => item.hour - 3)
+
+  const availableTimes = possibleTimes.filter(
+    (time) => !blockedHours.some((hour) => hour === time),
   )
 
-  const blockedTimes = possibleBlockedTimes.filter((time) => time)
-
-  return Response.json({ availability: blockedTimes })
+  return Response.json({ possibleTimes, availableTimes })
 }

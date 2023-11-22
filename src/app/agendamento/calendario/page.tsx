@@ -4,15 +4,19 @@ import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
 import { TimePickerItem } from '@/components/time-picker-item'
 import dayjs from 'dayjs'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
+
+interface Availability {
+  possibleTimes: number[]
+  availableTimes: number[]
+}
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedHour, setSelectedHour] = useState<number | null>(null)
-  const avaliableHours = useRef([])
 
   const isDateSelected = !!selectedDate
-  const isTimeSelected = true
+  const isTimeSelected = false
 
   const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
   const describeDate = selectedDate
@@ -20,16 +24,25 @@ export default function Calendario() {
     : null
 
   async function handleSelectedDate(date: Date) {
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    const responseTime = await fetch(
-      `/api/v1/availability?date=${year}-${month}-${day}`,
-    )
-    const timeData = await responseTime.json()
-    avaliableHours.current = timeData.availability
     setSelectedDate(date)
   }
+
+  const selectedDateWithoutTime = selectedDate
+    ? dayjs(selectedDate).format('YYYY-MM-DD')
+    : null
+
+  const { data: availability, isLoading } = useSWR<Availability>(
+    selectedDate ? ['availability', selectedDateWithoutTime] : null,
+    async () => {
+      const response = await fetch(
+        `/api/v1/availability?date=${selectedDateWithoutTime}`,
+      )
+
+      const json = await response.json()
+
+      return json
+    },
+  )
 
   return (
     <Container>
@@ -59,11 +72,25 @@ export default function Calendario() {
               last:mb-6
               "
             >
-              {avaliableHours.current.map((time) => {
+              {availability?.possibleTimes.map((hour) => {
                 return (
-                  <TimePickerItem key={time}>{`${time}:00`}</TimePickerItem>
+                  <TimePickerItem
+                    key={hour}
+                    disabled={!availability.availableTimes.includes(hour)}
+                  >
+                    {String(hour).padStart(2, '0')}:00h
+                  </TimePickerItem>
                 )
               })}
+              {isLoading &&
+                Array.from({ length: 8 }, (_, index) => (
+                  <button
+                    className="h-9 w-full bg-gray-600 rounded-lg"
+                    key={index}
+                  >
+                    Loading...
+                  </button>
+                ))}
             </div>
           </div>
         )}

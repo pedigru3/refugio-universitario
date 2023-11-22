@@ -1,7 +1,7 @@
 'use client'
 
 import '@/lib/dayjs'
-
+import useSWR from 'swr'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { CalendarActions } from './calendar-actions'
 import { CalendarContainer } from './calendar-container'
@@ -19,6 +19,11 @@ interface CalendarWeek {
 }
 
 type CalendarWeeks = CalendarWeek[]
+
+interface BlockedDates {
+  blockedWeekDays: number[]
+  blockedDates: number[]
+}
 
 interface CalendarProps {
   selectDate: Date | null
@@ -42,9 +47,28 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
 
   const currentMonth = currentDate.format('MMMM')
   const currentYear = currentDate.format('YYYY')
-  const today = dayjs(new Date())
+
+  const { data: blockedDates, isLoading } = useSWR<BlockedDates>(
+    ['blocked-dates', currentDate.get('year'), currentDate.get('month')],
+    async () => {
+      const year = currentDate.get('year')
+      const month = currentDate.get('month') + 1
+      const response = await fetch(
+        `/api/v1/blocked-dates?year=${year}&month=${month}`,
+      )
+
+      const json = await response.json()
+
+      console.log(json)
+
+      return json
+    },
+  )
 
   const calendarWeeks = useMemo(() => {
+    if (!blockedDates) {
+      return []
+    }
     const daysInMonthArray = Array.from({
       length: currentDate.daysInMonth(),
     }).map((_, i) => {
@@ -81,7 +105,13 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
         return { date, disabled: true }
       }),
       ...daysInMonthArray.map((date) => {
-        return { date, disabled: date.endOf('day').isBefore(today) }
+        return {
+          date,
+          disabled:
+            date.endOf('day').isBefore(new Date()) ||
+            blockedDates.blockedWeekDays.includes(date.get('day')) ||
+            blockedDates.blockedDates.includes(date.get('date')),
+        }
       }),
       ...nextMonthFillArray.map((date) => {
         return { date, disabled: true }
@@ -104,7 +134,7 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
     )
 
     return calendarWeeks
-  }, [currentDate])
+  }, [currentDate, blockedDates])
 
   return (
     <CalendarContainer>
@@ -115,7 +145,9 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
 
         <CalendarActions>
           <button
-            disabled={currentDate.subtract(1, 'M').isBefore(today.startOf('M'))}
+            disabled={currentDate
+              .subtract(1, 'M')
+              .isBefore(dayjs(new Date()).startOf('M'))}
             title="Mês anterior"
             className="enabled:cursor-pointer disabled:opacity-40 leading-[0] rounded-sm hover:enabled:text-gray-200 focus:shadow-sm"
             onClick={handlePreviousMonth}
@@ -141,6 +173,20 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
           </tr>
         </thead>
         <tbody className=" before:leading-3 before:content-['.'] before:block before:text-gray-800">
+          {isLoading &&
+            Array.from({ length: 5 }).map((_, index) => {
+              return (
+                <tr key={index}>
+                  {Array.from({ length: 7 }).map((_, index) => {
+                    return (
+                      <td key={index}>
+                        <div className="w-full aspect-square bg-gray-600 rounded-md"></div>
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
           {calendarWeeks.map(({ week, days }) => {
             return (
               <tr key={week}>

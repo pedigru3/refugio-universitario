@@ -1,8 +1,15 @@
 import { ReactNode } from 'react'
 
-export function TimePickerItem({ children }: { children: ReactNode }) {
+export function TimePickerItem({
+  children,
+  disabled,
+}: {
+  children: ReactNode
+  disabled?: boolean
+}) {
   return (
     <button
+      disabled={disabled ?? false}
       className="
   border-none bg-gray-600 py-2 cursor-pointer
    text-gray-100 rounded-md text-sm disabled:bg-none disabled:cursor-default
