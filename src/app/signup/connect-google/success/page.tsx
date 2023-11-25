@@ -19,9 +19,7 @@ export default function SuccessSignUp() {
         Seja muito bem-vindo ao Refúgio Universitário. Agora é só você marcar a
         melhor data para iniciar os seus estudos.
       </p>
-      <div className="mt-5 max-w-[540px]">
-        <Calendar />
-      </div>
+      <div className="mt-5 max-w-[540px]"></div>
     </div>
   )
 }

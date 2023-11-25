@@ -1,18 +1,11 @@
 'use client'
 
 import { SignUpForm } from '@/components/signup-form'
-import { signIn, useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function SignUp() {
   async function handleSignIn() {
     await signIn('google')
-  }
-
-  const session = useSession()
-  const isSignIn = session.status === 'authenticated'
-  if (isSignIn) {
-    redirect('/agendamento/calendario')
   }
 
   return (

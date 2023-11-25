@@ -55,25 +55,6 @@ export async function GET(request: NextRequest) {
     return startHour + i
   })
 
-  /* const possibleBlockedTimes = await Promise.all(
-    possibleTimes.map(async (time) => {
-      const result = await fetch(
-        `http://localhost:3000/api/v1/availability/table?date=${date}&hour=${time}`,
-      )
-
-      const jsonTable = await result.json()
-      const tableAvailability: TableAvailability[] = jsonTable.availability
-
-      const allUnavailable = tableAvailability.every(
-        (table) => !table.isAvailable,
-      )
-
-      if (!allUnavailable) {
-        return time
-      }
-    }),
-  ) */
-
   const blockedHoursRaw: Array<{ hour: number }> = await prisma.$queryRaw`
     WITH TotalTables AS (
       SELECT
@@ -106,13 +87,15 @@ export async function GET(request: NextRequest) {
     HAVING
       COUNT(S.date) >= TT.chairs
   `
-
   // Aqui foi ajustado manualmente o fuso horário (-3 horas)
   const blockedHours = blockedHoursRaw.map((item) => item.hour - 3)
 
-  const availableTimes = possibleTimes.filter(
-    (time) => !blockedHours.some((hour) => hour === time),
-  )
+  const availableTimes = possibleTimes.filter((time) => {
+    const isTimeBlocked = blockedHours.some((hour) => hour === time)
+    const isTimeInPast = referenceDate.set('hour', time).isBefore(new Date())
+
+    return !isTimeBlocked && !isTimeInPast
+  })
 
   return Response.json({ possibleTimes, availableTimes })
 }

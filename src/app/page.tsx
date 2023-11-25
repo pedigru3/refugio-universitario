@@ -1,13 +1,9 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from './api/auth/[...nextauth]/options'
 import Image from 'next/image'
 import { Container } from '@/components/container'
 import { Header } from '@/components/header'
 import Link from 'next/link'
 
 export default async function Home() {
-  const session = await getServerSession(authOptions)
-
   return (
     <>
       <div className="bg-gradient-to-tr from-purple-900 via-purple-700 to-purple-400 min-h-[720px] w-full">
@@ -31,7 +27,7 @@ export default async function Home() {
               jornadas acadêmicas.
             </p>
             <div className="mt-8 py-2 text-black text-lg font-medium bg-yellow-400 rounded-3xl inline-block">
-              <Link className="px-8 py-2" href="/signup">
+              <Link className="px-8 py-2" href="/agendamento">
                 Inscreva-se grátis
               </Link>
             </div>

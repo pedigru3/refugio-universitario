@@ -1,14 +1,12 @@
 'use client'
 
 import { Container } from '@/components/container'
-import { CircleNotch } from '@phosphor-icons/react'
+import { Loading } from '@/components/loading'
 
 export default function LoadingPage() {
   return (
     <Container>
-      <div className="flex justify-center items-center">
-        <CircleNotch size={32} className="animate-spin " />
-      </div>
+      <Loading />
     </Container>
   )
 }

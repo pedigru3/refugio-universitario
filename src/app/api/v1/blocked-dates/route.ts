@@ -29,10 +29,17 @@ export async function GET(request: NextRequest) {
   })
 
   const blockedDatesRaw: Array<{ date: number }> = await prisma.$queryRaw`
+    WITH TotalTables AS (
+      SELECT
+        SUM(chair_count) AS chairs
+      FROM
+        tables
+    )
+    
     SELECT
       EXTRACT(DAY FROM S.date) AS date,
       COUNT(S.date) AS amount,
-      (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TB.chair_count ) AS size
+      (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TT.chairs ) AS size
     FROM schedulings S
 
     LEFT JOIN available_schedules AVS
@@ -41,19 +48,19 @@ export async function GET(request: NextRequest) {
     LEFT JOIN tables TB
       ON TB.id = S.table_id
 
+    CROSS JOIN TotalTables TT
+
     WHERE TO_CHAR(S.date, 'YYYY-MM') = ${`${year}-${month}`}
 
     GROUP BY EXTRACT(DAY FROM S.date), 
       ((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60),
-      TB.chair_count
+      TB.chair_count, TT.chairs
 
     HAVING 
-      COUNT(S.date) >= (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TB.chair_count );
+      COUNT(S.date) >= (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TT.chairs );
   `
 
   const blockedDates = blockedDatesRaw.map((item) => Number(item.date))
-
-  console.log(blockedDatesRaw)
 
   return Response.json({ blockedWeekDays, blockedDates })
 }

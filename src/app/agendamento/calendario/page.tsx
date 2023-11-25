@@ -1,10 +1,14 @@
 'use client'
 
+import { Button } from '@/components/button'
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
+import { Loading } from '@/components/loading'
+import { TableButton } from '@/components/table-button'
 import { TimePickerItem } from '@/components/time-picker-item'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRef, useState } from 'react'
 import useSWR from 'swr'
 
 interface Availability {
@@ -12,11 +16,30 @@ interface Availability {
   availableTimes: number[]
 }
 
-export default function Calendario() {
+interface AvailabilityTables {
+  table_id: string
+  table_name: string
+  isAvailable: boolean
+  empty_chairs: number
+  chair_count: number
+}
+
+type CalendarioProps = {
+  onFillingForm: (data: { dateTime: Date; tableId: string }) => void
+}
+
+export default function Calendario({ onFillingForm }: CalendarioProps) {
+  const { status, data: dataSession } = useSession({ required: true })
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [availabilityTables, setAvailabilityTables] = useState<
+    AvailabilityTables[] | null
+  >(null)
+
+  const [tableId, setTableId] = useState<string>('')
+  const hour = useRef<number>()
 
   const isDateSelected = !!selectedDate
-  const isTimeSelected = false
 
   const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
   const describeDate = selectedDate
@@ -25,6 +48,28 @@ export default function Calendario() {
 
   async function handleSelectedDate(date: Date) {
     setSelectedDate(date)
+    setAvailabilityTables(null)
+    setTableId('')
+    hour.current = undefined
+  }
+
+  async function handleSelectTime(time: number) {
+    hour.current = time
+    const dateWithTime = dayjs(selectedDate).set('hour', time).startOf('hour')
+    const dateFormated = dateWithTime.format('YYYY-MM-DD')
+    const response = await fetch(
+      `/api/v1/availability/table?date=${dateFormated}&hour=${time}`,
+    )
+    const data = await response.json()
+    const availabilityTables: AvailabilityTables[] = data.availability
+    setAvailabilityTables(availabilityTables)
+    setTableId('')
+  }
+
+  function handleSelectTable(isTableSelected: boolean, tableId: string) {
+    console.log(isTableSelected)
+    console.log('oi')
+    isTableSelected ? setTableId(tableId) : setTableId('')
   }
 
   const selectedDateWithoutTime = selectedDate
@@ -43,6 +88,10 @@ export default function Calendario() {
       return json
     },
   )
+
+  if (status === 'loading') {
+    return <Loading />
+  }
 
   return (
     <Container>
@@ -72,13 +121,15 @@ export default function Calendario() {
               last:mb-6
               "
             >
-              {availability?.possibleTimes.map((hour) => {
+              {availability?.possibleTimes.map((time) => {
                 return (
                   <TimePickerItem
-                    key={hour}
-                    disabled={!availability.availableTimes.includes(hour)}
+                    onClick={() => handleSelectTime(time)}
+                    isChecked={time === hour.current}
+                    key={time}
+                    disabled={!availability.availableTimes.includes(time)}
                   >
-                    {String(hour).padStart(2, '0')}:00h
+                    {String(time).padStart(2, '0')}:00h
                   </TimePickerItem>
                 )
               })}
@@ -95,10 +146,48 @@ export default function Calendario() {
           </div>
         )}
       </div>
-      {isTimeSelected && (
-        <div className="bg-zinc-800 mt-5 rounded-md box-border max-w-[540px] lg:max-w-[800px]">
-          <p className="mx-5 pt-5">Reserve seu lugar:</p>
-          <div className="flex items-center justify-center"></div>
+      {availabilityTables && (
+        <div className="bg-zinc-800 border-t border-zinc-400 rounded-md rounded-t-none box-border max-w-[540px] lg:max-w-[800px]">
+          <div className="mx-5 pt-5 pb-5">
+            Reserve seu lugar das{' '}
+            <span className="font-bold">{hour.current} horas:</span>
+            <div className="flex gap-2 mt-2 mb-2">
+              {availabilityTables.map((table) => {
+                return (
+                  <TableButton
+                    key={
+                      table.table_id + table.chair_count + table.empty_chairs
+                    }
+                    chairCount={table.chair_count}
+                    emptyChairs={table.empty_chairs}
+                    isAvailable={table.isAvailable}
+                    tableName={table.table_name}
+                    isChecked={tableId === table.table_id}
+                    onSelectedTable={(isTableSelected) =>
+                      handleSelectTable(isTableSelected, table.table_id)
+                    }
+                  />
+                )
+              })}
+            </div>
+          </div>
+          {tableId.length > 0 && (
+            <div className="px-6 pb-6 w-full border-t">
+              <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-5">
+                <div className="items-center self-center">
+                  <p>
+                    {dataSession.user?.name?.split(' ', 1)}, confirme o
+                    agendamento:
+                  </p>
+                  <p>Data: {dayjs(selectedDate).format('dddd, DD/MM/YYYY')}</p>
+                  <p>Horário: {hour.current} horas</p>
+                </div>
+                <div className="-mt-5">
+                  <Button bgColor={'gray'}>Confirmar</Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Container>

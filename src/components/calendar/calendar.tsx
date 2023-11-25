@@ -59,8 +59,6 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
 
       const json = await response.json()
 
-      console.log(json)
-
       return json
     },
   )
@@ -194,6 +192,10 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
                   return (
                     <td key={date.toString()}>
                       <CalendarDay
+                        isChecked={
+                          date.format('MM-DD') ===
+                          dayjs(selectDate).format('MM-DD')
+                        }
                         disabled={disabled}
                         onClick={() => onDateSelected(date.toDate())}
                       >

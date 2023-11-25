@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
       'hour',
       Number(hourParam),
     )
+    console.log(dateParam)
+    console.log(referenceDate.toDate())
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())
@@ -75,6 +77,7 @@ export async function GET(request: NextRequest) {
           table_name: table.table_name,
           isAvailable: true,
           empty_chairs: table.chair_count,
+          chair_count: table.chair_count,
         }
       }
       // Calculate availability based on scheduled events and chair count
@@ -85,6 +88,7 @@ export async function GET(request: NextRequest) {
           currentTable?.schedulings.length < currentTable.chair_count,
         empty_chairs:
           currentTable.chair_count - currentTable.schedulings.length,
+        chair_count: currentTable.chair_count,
       }
     })
     return Response.json({ availability: availabilityTables })
@@ -96,4 +100,9 @@ export async function GET(request: NextRequest) {
     )
   }
   // Return the availability information as a JSON response
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+  console.log(body)
 }

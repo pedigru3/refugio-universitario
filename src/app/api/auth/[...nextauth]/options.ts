@@ -1,9 +1,13 @@
 import { PrismaAdapter } from '@/lib/auth/prisma-adapter'
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
+import { signIn } from 'next-auth/react'
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
+  pages: {
+    signIn: '/signup',
+  },
   adapter: PrismaAdapter(),
   providers: [
     GoogleProvider({
