@@ -16,6 +16,7 @@
     "@prisma/client": "^5.5.2",
     "@types/node-fetch": "^2.6.8",
     "dayjs": "^1.11.10",
+    "googleapis": "^128.0.0",
     "next": "14.0.0",
     "next-auth": "^4.24.4",
     "react": "^18",

@@ -15,6 +15,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       authorization: {
         params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
           scope:
             'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
         },
@@ -42,6 +45,18 @@ export const authOptions: NextAuthOptions = {
       }
 
       return true
+    },
+    async session({ session, user, token }) {
+      const expires = session.expires
+      return {
+        user: {
+          email: user.email,
+          image: user.avatar_url,
+          name: user.name,
+          username: user.username,
+        },
+        expires,
+      }
     },
   },
 }

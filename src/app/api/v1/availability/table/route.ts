@@ -101,8 +101,3 @@ export async function GET(request: NextRequest) {
   }
   // Return the availability information as a JSON response
 }
-
-export async function POST(request: NextRequest) {
-  const body = await request.json()
-  console.log(body)
-}

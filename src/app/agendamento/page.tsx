@@ -10,6 +10,7 @@ import dayjs from 'dayjs'
 import { useSession } from 'next-auth/react'
 import { useRef, useState } from 'react'
 import useSWR from 'swr'
+import { useRouter } from 'next/navigation'
 
 interface Availability {
   possibleTimes: number[]
@@ -26,6 +27,9 @@ interface AvailabilityTables {
 
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
+  const [isSending, setIsSending] = useState(false)
+
+  const router = useRouter()
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [availabilityTables, setAvailabilityTables] = useState<
@@ -69,9 +73,34 @@ export default function Agendamento() {
   }
 
   async function handleSendingForm() {
-    console.log({
-      user: dataSession?.user,
-    })
+    setIsSending(true)
+    if (!selectedDate || !hour.current || tableId === '') {
+      return
+    }
+
+    const body = {
+      date: dayjs(selectedDate)
+        .set('hour', hour.current)
+        .startOf('hour')
+        .toDate(),
+      table_id: tableId,
+    }
+
+    const response = await fetch(
+      `/api/v1/scheduling/${dataSession?.user.username}`,
+      {
+        body: JSON.stringify(body),
+        method: 'POST',
+      },
+    )
+
+    if (response.ok) {
+      setIsSending(false)
+
+      return router.push('/agendamento/success')
+    }
+
+    setIsSending(false)
   }
 
   const selectedDateWithoutTime = selectedDate
@@ -84,9 +113,7 @@ export default function Agendamento() {
       const response = await fetch(
         `/api/v1/availability?date=${selectedDateWithoutTime}`,
       )
-
       const json = await response.json()
-
       return json
     },
   )
@@ -178,14 +205,18 @@ export default function Agendamento() {
               <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-5">
                 <div className="items-center self-center">
                   <p>
-                    {dataSession.user?.name?.split(' ', 1)}, confirme o
-                    agendamento:
+                    {dataSession.user?.name?.split(' ', 1)}, confirme sua
+                    reserva:
                   </p>
                   <p>Data: {dayjs(selectedDate).format('dddd, DD/MM/YYYY')}</p>
                   <p>Horário: {hour.current} horas</p>
                 </div>
                 <div className="-mt-5">
-                  <Button onClick={handleSendingForm} bgColor={'gray'}>
+                  <Button
+                    isLoading={isSending}
+                    onClick={handleSendingForm}
+                    bgColor={'gray'}
+                  >
                     Confirmar
                   </Button>
                 </div>
