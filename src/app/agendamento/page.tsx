@@ -96,7 +96,6 @@ export default function Agendamento() {
 
     if (response.ok) {
       setIsSending(false)
-
       return router.push('/agendamento/success')
     }
 

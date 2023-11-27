@@ -1,13 +1,14 @@
 import '../lib/dayjs'
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+
 import './globals.css'
+
 import AuthProvider from '@/context/authprovider'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from './api/auth/[...nextauth]/options'
 
-const inter = Inter({ subsets: ['latin'] })
+import { inter, plusJakartaSans } from './fonts'
 
 export const metadata: Metadata = {
   title: 'Visão Teológica',
@@ -23,7 +24,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} ${plusJakartaSans.variable}`}>
         <AuthProvider session={session}>{children}</AuthProvider>
       </body>
     </html>

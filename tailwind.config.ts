@@ -8,6 +8,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'plus-jakarta-sans': 'var(--font-plus-jakarta-sans)',
+      },
+      colors: {
+        'gradient-start': '#1101A2',
+        'gradient-middle': '#7705F7',
+        'gradient-end': '#B40EFF',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

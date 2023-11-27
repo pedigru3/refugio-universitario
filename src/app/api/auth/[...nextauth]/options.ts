@@ -1,10 +1,8 @@
 import { PrismaAdapter } from '@/lib/auth/prisma-adapter'
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
-import { signIn } from 'next-auth/react'
 
 export const authOptions: NextAuthOptions = {
-  // Configure one or more authentication providers
   pages: {
     signIn: '/signup',
   },
@@ -46,7 +44,7 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-    async session({ session, user, token }) {
+    async session({ session, user }) {
       const expires = session.expires
       return {
         user: {
