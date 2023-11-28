@@ -1,7 +1,6 @@
 'use client'
 
 import { Header } from '@/components/header'
-import { useSession } from 'next-auth/react'
 
 export default function SignUpLayout({
   children,
@@ -9,9 +8,11 @@ export default function SignUpLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-purple-700 h-screen">
-      <Header />
-      <div className="bg-gradient-to-br min-h-full from-purple-900 via-purple-700 to-purple-400 w-full py-5">
+    <div>
+      <div className="bg-purple-700">
+        <Header />
+      </div>
+      <div className="bg-gradient-to-br from-purple-900 via-purple-700 to-purple-400 w-full min-h-screen py-5">
         {children}
       </div>
     </div>

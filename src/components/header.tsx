@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { Container } from './container'
 import Image from 'next/image'
+import { MenuDesktop } from './menu-desktop'
+import { MenuMobile } from './menu-mobile'
 
 export function Header() {
   return (
     <Container>
-      <div className="flex justify-between py-3 md:hidden">
+      <div className="flex justify-between py-3 md:hidde items-center">
         <Link href={'/'}>
           <Image
             src={'/refugio-logo.png'}
@@ -15,16 +17,18 @@ export function Header() {
             alt={'logo Refúgio Universitário'}
           />
         </Link>
-        <p>menu</p>
+        <MenuMobile />
       </div>
-      <div className="justify-between py-3 hidden md:flex">
-        <Image
-          src={'/refugio-logo.png'}
-          width={130}
-          height={10}
-          alt={'logo Refúgio Universitário'}
-        />
-        <p>menu</p>
+      <div className="justify-between py-3 hidden md:flex items-center">
+        <Link href={'/'}>
+          <Image
+            src={'/refugio-logo.png'}
+            width={130}
+            height={130}
+            alt={'logo Refúgio Universitário'}
+          />
+        </Link>
+        <MenuDesktop />
       </div>
     </Container>
   )

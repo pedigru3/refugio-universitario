@@ -10,14 +10,21 @@ type BulletIconProps = {
 
 export function BulletIcon({ iconPath, text, title, alt }: BulletIconProps) {
   return (
-    <Container>
-      <div className="mt-12">
-        <Image src={iconPath} width={64} height={64} alt={alt ?? title} />
-        <h3 className="text-gray-800 font-bold text-xl font-plus-jakarta-sans">
-          {title}
-        </h3>
-        <p className="text-gray-500 font-normal leading-7 mt-2">{text}</p>
-      </div>
-    </Container>
+    <div className="pt-12">
+      <Image src={iconPath} width={64} height={64} alt={alt ?? title} />
+      <h3
+        className="text-gray-800 font-bold text-xl font-plus-jakarta-sans
+      lg:text-2xl lg:pt-3
+      "
+      >
+        {title}
+      </h3>
+      <p
+        className="text-gray-500 font-normal lg:font-thin lg:text-lg 
+      leading-8 lg:leading-8 mt-2"
+      >
+        {text}
+      </p>
+    </div>
   )
 }
