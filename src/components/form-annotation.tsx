@@ -1,5 +1,3 @@
-import { FieldError } from 'react-hook-form'
-
 type FormAnnotationProps = {
   annotation: string | undefined
 }

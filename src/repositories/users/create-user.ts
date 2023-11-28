@@ -8,7 +8,7 @@ export async function createUser({ name, username }: UserProps) {
     name,
     username,
   }
-  const result = await fetch(`${process.env.BASE_URL}/api/v1/users`, {
+  await fetch(`${process.env.BASE_URL}/api/v1/users`, {
     method: 'post',
     body: JSON.stringify(body),
   })

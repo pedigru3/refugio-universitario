@@ -1,7 +1,5 @@
 'use client'
 
-import { Calendar } from '@/components/calendar/calendar'
-import { Container } from '@/components/container'
 import { useSession } from 'next-auth/react'
 
 export default function SuccessSignUp() {
@@ -9,9 +7,8 @@ export default function SuccessSignUp() {
   return (
     <div className="mt-10">
       <p>
-        Sucesso,{' '}
+        Sucesso,
         <span className="font-medium">
-          {' '}
           {session.data?.user?.name?.split(' ', 1)}!
         </span>
       </p>

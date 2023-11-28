@@ -3,13 +3,6 @@ import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
 import { type NextRequest } from 'next/server'
 
-type TableAvailability = {
-  table_id: string
-  table_name: string
-  isAvailable: boolean
-  empty_chairs: number
-}
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
 
