@@ -5,12 +5,12 @@ import { type NextRequest } from 'next/server'
 
 // Define the handler for the GET request
 export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+
+  const dateParam = searchParams.get('date')
+  const hourParam = searchParams.get('hour')
+
   try {
-    const searchParams = request.nextUrl.searchParams
-
-    const dateParam = searchParams.get('date')
-    const hourParam = searchParams.get('hour')
-
     if (!dateParam) {
       return Response.json({ error: 'Date not provided.' }, { status: 400 })
     }
@@ -23,8 +23,6 @@ export async function GET(request: NextRequest) {
       'hour',
       Number(hourParam),
     )
-    console.log(dateParam)
-    console.log(referenceDate.toDate())
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())

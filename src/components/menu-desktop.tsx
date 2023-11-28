@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 export function MenuDesktop() {
   const pathName = usePathname()
-  console.log(pathName)
 
   return (
     <nav>
