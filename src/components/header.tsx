@@ -7,7 +7,7 @@ import { MenuMobile } from './menu-mobile'
 export function Header() {
   return (
     <Container>
-      <div className="flex justify-between py-3 md:hidde items-center">
+      <div className="flex justify-between py-3 md:hidden items-center">
         <Link href={'/'}>
           <Image
             src={'/refugio-logo.png'}

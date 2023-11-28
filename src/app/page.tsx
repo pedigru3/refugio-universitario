@@ -4,6 +4,7 @@ import { Header } from '@/components/header'
 import Link from 'next/link'
 
 import { BulletIcon } from '@/components/bullet-icon'
+import { Title } from '@/components/title'
 
 export default async function Home() {
   return (
@@ -73,9 +74,9 @@ export default async function Home() {
         </Container>
         <Container>
           <div className="pt-10 text-gray-500 leading-8 mb-10">
-            <h2 className="text-gray-800 font-bold text-2xl max-w-[16rem] font-plus-jakarta-sans ">
+            <Title color="dark" type="h2">
               Conheça nosso espaço de estudo
-            </h2>
+            </Title>
             <p className="pt-5">
               Estamos localizados perto da UEL (Universidade Estadual de
               Londrina), dentro do Condomínio Universitário. Utilizamos o espaço

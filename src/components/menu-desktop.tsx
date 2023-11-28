@@ -1,25 +1,11 @@
 'use client'
 
+import { menuList } from '@/consts/menuList'
 import { usePathname } from 'next/navigation'
 
 export function MenuDesktop() {
   const pathName = usePathname()
   console.log(pathName)
-
-  const menuList = [
-    {
-      title: 'Home',
-      link: '/',
-    },
-    {
-      title: 'Agendamento',
-      link: '/agendamento',
-    },
-    {
-      title: 'FAQ',
-      link: '/faq',
-    },
-  ]
 
   return (
     <nav>
