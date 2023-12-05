@@ -91,7 +91,6 @@ export async function GET(request: NextRequest) {
     })
     return Response.json({ availability: availabilityTables })
   } catch (error) {
-    console.error('Error:', error)
     return Response.json(
       { error: 'Something unexpected happened' },
       { status: 500 },

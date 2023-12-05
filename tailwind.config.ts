@@ -15,6 +15,7 @@ const config: Config = {
         'gradient-start': '#1101A2',
         'gradient-middle': '#7705F7',
         'gradient-end': '#B40EFF',
+        'purple-dark': '#4C0C7F',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
