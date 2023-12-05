@@ -10,5 +10,6 @@ declare module 'next-auth' {
     course: string
     education_level: string
     avatar_url: string
+    role: string
   }
 }

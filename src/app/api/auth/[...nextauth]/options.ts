@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
           avatar_url: profile.picture,
           course: '',
           education_level: '',
+          role: profile.role ?? 'user',
         }
       },
     }),
@@ -52,6 +53,7 @@ export const authOptions: NextAuthOptions = {
           image: user.avatar_url,
           name: user.name,
           username: user.username,
+          role: user.role,
         },
         expires,
       }

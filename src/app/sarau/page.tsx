@@ -18,8 +18,8 @@ export default function Sarau() {
             <h1 className={`${kalam.className} text-[100px] leading-[1]`}>
               Sarau
             </h1>
-            <h2 className={`${kalam.className} leading-[0.5] text-lg`}>
-              Música - Performance + Poesia
+            <h2 className={`${kalam.className} leading-[0.5] text-2xl`}>
+              Música + Arte + Poesia
             </h2>
           </Container>
         </div>
@@ -43,7 +43,7 @@ export default function Sarau() {
             <p
               className={`${kalam.className} w-52 text-2xl text-right text-black leading-[1]`}
             >
-              às 19h
+              às 17h
             </p>
           </div>
           <div className="absolute">
@@ -63,7 +63,10 @@ export default function Sarau() {
                 Local: Rua Rubéns Ávila, 150. Atrás do restaurante Papo Cabeça.
               </p>
               <p>
-                <a href="#" className="underline">
+                <a
+                  href="https://forms.gle/PiC3F3o9ur7GwA4u7"
+                  className="underline"
+                >
                   Inscreva-se aqui
                 </a>
                 . Mas atenção, pois as inscrições são limitadas.

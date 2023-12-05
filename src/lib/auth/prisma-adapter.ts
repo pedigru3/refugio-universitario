@@ -23,6 +23,7 @@ export function PrismaAdapter(): Adapter {
           name: user.name,
           email: user.email,
           avatar_url: user.avatar_url,
+          role: user.role ?? 'user',
         },
       })
 
@@ -37,6 +38,7 @@ export function PrismaAdapter(): Adapter {
         avatar_url: prismaUser.avatar_url!,
         course: prismaUser.course,
         education_level: prismaUser.education_level,
+        role: prismaUser.role ?? 'user',
       }
     },
 
@@ -60,6 +62,7 @@ export function PrismaAdapter(): Adapter {
         avatar_url: user.avatar_url,
         course: user.course,
         education_level: user.education_level,
+        role: user.role ?? 'user',
       }
     },
 
@@ -83,6 +86,7 @@ export function PrismaAdapter(): Adapter {
         avatar_url: user.avatar_url,
         course: user.course,
         education_level: user.education_level,
+        role: user.role ?? 'user',
       }
     },
 
@@ -118,6 +122,7 @@ export function PrismaAdapter(): Adapter {
         avatar_url: user.avatar_url,
         course: user.course,
         education_level: user.education_level,
+        role: user.role ?? 'user',
       }
     },
 
@@ -132,6 +137,7 @@ export function PrismaAdapter(): Adapter {
           avatar_url: user.avatar_url,
           course: user.course,
           education_level: user.education_level,
+          role: user.role ?? 'user',
         },
       })
 
@@ -148,6 +154,7 @@ export function PrismaAdapter(): Adapter {
         avatar_url: prismaUser.avatar_url,
         course: prismaUser.course,
         education_level: prismaUser.education_level,
+        role: prismaUser.role ?? 'user',
       }
     },
 
@@ -229,6 +236,7 @@ export function PrismaAdapter(): Adapter {
           avatar_url: user.avatar_url!,
           course: user.course,
           education_level: user.education_level,
+          role: user.role ?? 'user',
         },
       }
     },

@@ -22,6 +22,9 @@ export default async function RootLayout({
 }) {
   const session = await getServerSession(authOptions)
 
+  console.log('sessao')
+  console.log(session?.user.role)
+
   return (
     <html className="bg-blue-950" lang="pt-br">
       <body className={`${inter.className} ${plusJakartaSans.variable}`}>
