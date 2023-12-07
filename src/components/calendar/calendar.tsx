@@ -23,6 +23,8 @@ type CalendarWeeks = CalendarWeek[]
 interface BlockedDates {
   blockedWeekDays: number[]
   blockedDates: number[]
+  lastDay: string
+  startDay: string
 }
 
 interface CalendarProps {
@@ -62,6 +64,8 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
       return json
     },
   )
+
+  console.log(blockedDates?.startDay)
 
   const calendarWeeks = useMemo(() => {
     if (!blockedDates) {
@@ -108,7 +112,9 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
           disabled:
             date.endOf('day').isBefore(new Date()) ||
             blockedDates.blockedWeekDays.includes(date.get('day')) ||
-            blockedDates.blockedDates.includes(date.get('date')),
+            blockedDates.blockedDates.includes(date.get('date')) ||
+            date.endOf('day').isAfter(dayjs(blockedDates.lastDay)) ||
+            date.endOf('day').isBefore(dayjs(blockedDates.startDay)),
         }
       }),
       ...nextMonthFillArray.map((date) => {

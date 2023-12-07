@@ -25,7 +25,6 @@ export function TableButton({
 
   function handleSelectPlace() {
     if (isChecked) {
-      console.log('check')
       onSelectedTable(false)
     } else {
       onSelectedTable(true)

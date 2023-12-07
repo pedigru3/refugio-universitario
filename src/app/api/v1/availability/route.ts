@@ -1,7 +1,29 @@
 /* eslint-disable camelcase */
 import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
+import { getServerSession } from 'next-auth'
 import { type NextRequest } from 'next/server'
+import { authOptions } from '../../auth/[...nextauth]/options'
+import { z } from 'zod'
+
+const timeIntervalSchema = z.object({
+  weekDay: z.number(),
+  startTimeInMinutes: z.number(),
+  endTimeInMinutes: z.number(),
+  finalDay: z.string().optional(),
+})
+
+const timeIntervalsBodySchema = z.object({
+  intervals: z.array(timeIntervalSchema),
+  lastDay: z
+    .string()
+    .refine((date) =>
+      dayjs(date).isAfter(dayjs(new Date()).hour(23).minute(59)),
+    ),
+  startDay: z.string(),
+})
+
+// type TimeInterval = z.infer<typeof timeIntervalsBodySchema>
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -28,6 +50,20 @@ export async function GET(request: NextRequest) {
       week_day: referenceDate.get('day'),
     },
   })
+
+  const lastDay = availableSchedule?.final_day
+
+  const isBlockedDateByLastDay = referenceDate
+    .endOf('day')
+    .isAfter(dayjs(lastDay))
+
+  if (isBlockedDateByLastDay) {
+    return Response.json({
+      possibleTimes: [],
+      availableTimes: [],
+      message: 'Day after last day',
+    })
+  }
 
   if (!availableSchedule) {
     return Response.json({
@@ -91,4 +127,35 @@ export async function GET(request: NextRequest) {
   })
 
   return Response.json({ possibleTimes, availableTimes })
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+  const session = await getServerSession(authOptions)
+
+  if (session?.user.role !== 'admin') {
+    return Response.json({ error: 'unauthenticated' }, { status: 401 })
+  }
+
+  const { intervals, lastDay, startDay } = timeIntervalsBodySchema.parse(body)
+
+  const availableSchedules = await prisma.availableSchedule.findFirst()
+
+  if (availableSchedules) {
+    await prisma.availableSchedule.deleteMany()
+  }
+
+  await prisma.availableSchedule.createMany({
+    data: intervals.map((interval) => {
+      return {
+        time_start_in_minutes: interval.startTimeInMinutes,
+        time_end_in_minutes: interval.endTimeInMinutes,
+        week_day: interval.weekDay,
+        start_day: new Date(startDay),
+        final_day: new Date(lastDay),
+      }
+    }),
+  })
+
+  return Response.json({}, { status: 201 })
 }

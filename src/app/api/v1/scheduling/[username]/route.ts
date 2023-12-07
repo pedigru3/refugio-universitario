@@ -28,8 +28,6 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const { date, table_id: tableId } = BorySchema.parse(bory)
 
-    console.log('dataDATA ', date)
-
     await prisma.scheduling.create({
       data: {
         date,

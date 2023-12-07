@@ -67,8 +67,6 @@ export default function Agendamento() {
   }
 
   function handleSelectTable(isTableSelected: boolean, tableId: string) {
-    console.log(isTableSelected)
-    console.log('oi')
     isTableSelected ? setTableId(tableId) : setTableId('')
   }
 

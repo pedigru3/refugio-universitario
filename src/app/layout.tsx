@@ -11,8 +11,8 @@ import { authOptions } from './api/auth/[...nextauth]/options'
 import { inter, plusJakartaSans } from './fonts'
 
 export const metadata: Metadata = {
-  title: 'Visão Teológica',
-  description: 'Olhando para o mundo com uma visão de Deus',
+  title: 'Refúgio Universitário',
+  description: 'Lugar de acolhimento e uma possiblidade de família',
 }
 
 export default async function RootLayout({
