@@ -11,6 +11,7 @@ import { FormAnnotation } from './form-annotation'
 import { useRouter, redirect } from 'next/navigation'
 import { Button } from './button'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 
 const signUpFormSchema = z.object({
   name: z.string().min(3, { message: 'O nome deve ter ao menos 3 letras' }),
@@ -35,14 +36,16 @@ export function SignUpForm() {
   const session = useSession()
   const isSignIn = session.status === 'authenticated'
   if (isSignIn) {
-    redirect('/agendamento/calendario')
+    redirect('/agendamento')
   }
+
+  const [errorResquest, setErrorRequest] = useState<string | undefined>()
 
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { isSubmitting, errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
   })
@@ -77,6 +80,9 @@ export function SignUpForm() {
       })
       if (result.ok) {
         router.push('/signup/connect-google')
+      } else {
+        const message = await result.json()
+        setErrorRequest(message.error)
       }
     } catch (error) {}
   }
@@ -110,8 +116,11 @@ export function SignUpForm() {
         options={educationLevels}
       />
       <FormAnnotation annotation={errors.educationLevel?.message} />
+      <FormAnnotation annotation={errorResquest} />
 
-      <Button type="submit">Próximo passo</Button>
+      <Button isLoading={isSubmitting} type="submit">
+        Próximo passo
+      </Button>
     </form>
   )
 }

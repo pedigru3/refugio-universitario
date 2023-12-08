@@ -1,9 +1,10 @@
-import { Header } from '@/components/header'
+import { Container } from '@/components/container'
+import { Loading } from '@/components/loading'
 
 export default function LoadingPage() {
   return (
-    <div className="bg-purple-500 w-screen h-screen">
-      <Header />
-    </div>
+    <Container>
+      <Loading />
+    </Container>
   )
 }

@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     if (userAlreadyExists) {
       if (userAlreadyExists.email) {
-        return Response.json({ error: 'user already exists' }, { status: 400 })
+        return Response.json({ error: 'Usuário já existe' }, { status: 400 })
       }
       // if have no email
       await prisma.user.update({

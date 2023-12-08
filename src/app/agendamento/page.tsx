@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react'
 import { useRef, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
+import { Title } from '@/components/title'
 
 interface Availability {
   possibleTimes: number[]
@@ -121,6 +122,9 @@ export default function Agendamento() {
 
   return (
     <Container>
+      <Title color="light" type="h2">
+        Agendamento
+      </Title>
       <div
         className={`mt-6 relative grid grid-cols-1 lg:max-w-[540px]
        max-w-[540px] bg-zinc-800 rounded-md ${

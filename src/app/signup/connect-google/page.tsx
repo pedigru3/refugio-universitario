@@ -5,8 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { FormAnnotation } from '@/components/form-annotation'
 import { Check } from '@phosphor-icons/react'
+import { useState } from 'react'
 
 export default function SignUp() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+
   const router = useRouter()
   const session = useSession()
   const searchParams = useSearchParams()
@@ -24,8 +28,10 @@ export default function SignUp() {
         </Button>
       ) : (
         <Button
-          onClick={() => {
-            signIn('google')
+          isLoading={googleLoading}
+          onClick={async () => {
+            setGoogleLoading(true)
+            await signIn('google')
           }}
         >
           {'Conectar ao Google Calendar ->'}
@@ -36,7 +42,9 @@ export default function SignUp() {
       )}
       <Button
         disabled={!isSignIn}
+        isLoading={isLoading}
         onClick={() => {
+          setIsLoading(true)
           router.push('/signup/connect-google/success')
         }}
       >

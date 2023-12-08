@@ -12,7 +12,7 @@ export function Title({ type, color, children }: TitleProps) {
       <h2
         className={`${
           color === 'dark' ? 'text-gray-800' : 'text-white'
-        } font-bold text-2xl max-w-[16rem] 
+        } font-bold text-2xl max-w-[16rem] lg:text-5xl lg:mt-2 lg:pb-2
         font-plus-jakarta-sans `}
       >
         {children}
