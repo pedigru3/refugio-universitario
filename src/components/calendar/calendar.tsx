@@ -113,7 +113,11 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
             date.endOf('day').isBefore(new Date()) ||
             blockedDates.blockedWeekDays.includes(date.get('day')) ||
             blockedDates.blockedDates.includes(date.get('date')) ||
-            date.endOf('day').isAfter(dayjs(blockedDates.lastDay)) ||
+            date
+              .startOf('day')
+              .isAfter(
+                dayjs(blockedDates.lastDay).endOf('day').add(1, 'day'),
+              ) ||
             date.endOf('day').isBefore(dayjs(blockedDates.startDay)),
         }
       }),
@@ -184,7 +188,7 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
                   {Array.from({ length: 7 }).map((_, index) => {
                     return (
                       <td key={index}>
-                        <div className="w-full aspect-square bg-gray-600 rounded-md"></div>
+                        <div className="w-full aspect-square bg-gray-600 rounded-md animate-pulse"></div>
                       </td>
                     )
                   })}

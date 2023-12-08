@@ -166,11 +166,9 @@ export default function Agendamento() {
               {isLoading &&
                 Array.from({ length: 8 }, (_, index) => (
                   <button
-                    className="h-9 w-full bg-gray-600 rounded-lg"
+                    className="h-9 w-full bg-gray-600 rounded-lg animate-pulse"
                     key={index}
-                  >
-                    Loading...
-                  </button>
+                  ></button>
                 ))}
             </div>
           </div>

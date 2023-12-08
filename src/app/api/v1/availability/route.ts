@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
   const lastDay = availableSchedule?.final_day
 
   const isBlockedDateByLastDay = referenceDate
-    .endOf('day')
-    .isAfter(dayjs(lastDay))
+    .startOf('day')
+    .isAfter(dayjs(lastDay).add(1, 'day'))
 
   if (isBlockedDateByLastDay) {
     return Response.json({
