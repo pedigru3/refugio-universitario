@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 
+export const revalidate = true
+
 export async function GET() {
   const updatedAt = new Date().toISOString()
 
@@ -20,7 +22,7 @@ export async function GET() {
     updated_at: updatedAt,
     dependences: {
       database: {
-        max_connections: Number(maxConnections),
+        max_connections: parseInt(maxConnections),
         opened_connections: openedConnections,
         version,
       },
