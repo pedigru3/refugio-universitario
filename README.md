@@ -2,7 +2,7 @@
 
 ## Descrição do Projeto
 
-O **Refúgio Universitário** é um projeto dedicado a proporcionar um ambiente propício para estudos em grupo para estudantes universitários. Através deste site, os usuários podem agendar um dia e horário de sua escolha para reservar uma mesa individual ou para o grupo de estudo.
+O **[Refúgio Universitário](https://refugiouniversitario.com.br/)** é um projeto dedicado a proporcionar um ambiente propício para estudos em grupo para estudantes universitários. Através deste site, os usuários podem agendar um dia e horário de sua escolha para reservar uma mesa individual ou para o grupo de estudo.
 
 ## Funcionalidades
 
@@ -20,7 +20,9 @@ O **Refúgio Universitário** é um projeto dedicado a proporcionar um ambiente 
 
 ## Instalação Local
 
-Para rodar o projeto localmente, siga os passos abaixo:
+Para rodar o projeto localmente, certifique-se de ter o Docker instalado em sua máquina. Se você ainda não tem o Docker instalado, você pode baixá-lo [aqui](https://www.docker.com/get-started). Você também precisará de uma conta na Google Cloud Platform para conseguir o GOOGLE CLIENT ID e o GOOGLE SECRET ID.
+
+Depois, siga os passos abaixo:
 
 1. Clone este repositório:
 ```bash
@@ -33,7 +35,19 @@ Para rodar o projeto localmente, siga os passos abaixo:
     npm install
 ```
 
-3. Inicie o servidor local:
+3. Copie o arquivo .exemple.env para .env e preencha os campos que faltam.
+
+4. Habilite o Google Calendar API e pegue os ID's:
+- Acesse[Google Cloud Console](https://console.cloud.google.com/).
+- Crie um novo projeto web.
+- Navegue até "API e Serviços" > "Biblioteca".
+- Pesquise e ative "Google Calendar API"
+- Depois, vá para "API e Serviços" > "Credenciais".
+- Clique em "Criar Credenciais" e selecione "ID do Cliente OAuth".
+- Em URI autorizadas coloque seu endereço local: http://localhost:3000
+- Em URI de redirecionamento, coloque http://localhost:3000/api/auth/callback/google
+
+4. Inicie o servidor local:
 ```bash 
     npm run dev
 ```

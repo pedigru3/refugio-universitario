@@ -55,6 +55,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           role: user.role,
+          course: user.course,
+          education_level: user.education_level,
         },
         expires,
       }

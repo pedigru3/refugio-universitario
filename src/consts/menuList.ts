@@ -2,13 +2,10 @@ export const menuList = [
   {
     title: 'Home',
     link: '/',
+    role: '',
   },
   {
     title: 'Agendamento',
     link: '/agendamento',
-  },
-  {
-    title: 'FAQ',
-    link: '/faq',
   },
 ]

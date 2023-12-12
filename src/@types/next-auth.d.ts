@@ -12,4 +12,8 @@ declare module 'next-auth' {
     avatar_url: string
     role: string
   }
+
+  interface Session {
+    user: User
+  }
 }
