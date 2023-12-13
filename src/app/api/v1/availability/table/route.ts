@@ -25,9 +25,11 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Hour not provided.' }, { status: 400 })
     }
 
-    const referenceDate = dayjs(String(dateParam))
+    const referenceDate = dayjs
+      .utc(String(dateParam))
       .set('hour', Number(hourParam))
-      .tz('America/Sao_Paulo')
+
+    console.log('DATA ATUAL: ', referenceDate.format())
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())
