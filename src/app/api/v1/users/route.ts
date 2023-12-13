@@ -2,7 +2,11 @@ import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 
 export async function GET() {
-  const users = await prisma.user.findMany()
+  const users = await prisma.user.findMany({
+    select: {
+      username: true,
+    },
+  })
 
   return Response.json({ users }, { status: 200 })
 }

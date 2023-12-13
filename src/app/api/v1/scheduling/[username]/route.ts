@@ -3,7 +3,6 @@ import { getGoogleOAuthToken } from '@/lib/google'
 import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
 import { google } from 'googleapis'
-import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 
 type RouteParams = {
@@ -104,7 +103,6 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({}, { status: 201 })
   } catch (error) {
-    console.log(error)
     return Response.json(
       { error: 'Something unexpected happened' },
       { status: 500 },

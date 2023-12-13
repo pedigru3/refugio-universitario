@@ -54,11 +54,9 @@ export function TableForm() {
     const dataTable = data as TableFormOutput
     const body = JSON.stringify(dataTable)
 
-    const response = await fetch('/api/v1/tables', { method: 'POST', body })
+    await fetch('/api/v1/tables', { method: 'POST', body })
 
     mutate()
-
-    console.log(response.status)
   }
 
   return (

@@ -9,7 +9,7 @@ export async function GET() {
     SELECT
     (SELECT version()) AS version,
     (SELECT current_setting('max_connections')) AS max_connections,
-    (SELECT count(*) FROM pg_stat_activity) AS opened_connections;
+    (SELECT count(*) FROM pg_stat_activity WHERE datname = 'local_db') AS opened_connections;
   `) as any
 
   const openedConnections = Number(fetchResponse[0].opened_connections)

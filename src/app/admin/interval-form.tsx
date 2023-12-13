@@ -109,7 +109,6 @@ export function IntervalForm() {
     const { intervals, lastDay, startDay } = data as TimeIntervalsFormOutput
 
     const body = JSON.stringify({ intervals, lastDay, startDay })
-    console.log(body)
 
     const response = await fetch('/api/v1/availability', {
       method: 'POST',

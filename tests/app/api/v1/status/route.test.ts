@@ -11,6 +11,6 @@ test('shold be return status', async () => {
   expect(typeof maxConnectionsParsed).toBe('number')
 
   const openedConnections = data.dependences.database.opened_connections
-  expect(openedConnections).toBeDefined()
+  expect(openedConnections).toEqual(1)
   expect(data.dependences.database.version).toEqual('16.0')
 })

@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { type NextRequest } from 'next/server'
 import { authOptions } from '../../auth/[...nextauth]/options'
 import { z } from 'zod'
+import { getTimeZoneOffset } from '@/utils/get-time-zone-offset'
 
 const timeIntervalSchema = z.object({
   weekDay: z.number(),
@@ -29,6 +30,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
 
   const date = searchParams.get('date')
+
+  const timeZoneDiff = getTimeZoneOffset()
 
   if (!date) {
     return Response.json({ error: 'Date not provided.' }, { status: 400 })
@@ -84,40 +87,40 @@ export async function GET(request: NextRequest) {
     return startHour + i
   })
 
-  const blockedHoursRaw: Array<{ hour: number }> = await prisma.$queryRaw`
-    WITH TotalTables AS (
-      SELECT
-        SUM(chair_count) AS chairs
-      FROM
-        tables
-    )
+  const blockedHoursRaw: Array<{ hour: number; amount: number; size: bigint }> =
+    await prisma.$queryRaw`
+    
+  WITH TotalTables AS (
+    SELECT SUM(chair_count) AS chairs
+    FROM tables
+  ),
 
+  HourlyCounts AS (
     SELECT
       EXTRACT(HOUR FROM S.date) AS hour,
-      COUNT(S.date) AS amount,
-      TT.chairs AS size
+      COUNT(S.date) AS amount
     FROM schedulings S
+    LEFT JOIN available_schedules AVS ON AVS.week_day = EXTRACT(DOW FROM S.date)
+    LEFT JOIN tables TB ON TB.id = S.table_id
+    WHERE TO_CHAR(S.date, 'YYYY-MM-DD') = ${`${referenceDate.format(
+      'YYYY-MM-DD',
+    )}`}
+    GROUP BY EXTRACT(HOUR FROM S.date)
+  )
 
-    LEFT JOIN available_schedules AVS
-      ON AVS.week_day = EXTRACT(DOW FROM S.date)
+  SELECT
+    HC.hour,
+    HC.amount,
+    TT.chairs AS size
+  FROM HourlyCounts HC
+  LEFT JOIN TotalTables TT ON true
+  WHERE HC.amount >= TT.chairs;
+`
 
-    LEFT JOIN tables TB
-      ON TB.id = S.table_id
+  console.log(blockedHoursRaw)
 
-    CROSS JOIN TotalTables TT
-
-    WHERE TO_CHAR(S.date, 'YYYY-MM-DD') 
-      = ${`${referenceDate.format('YYYY-MM-DD')}`}
-
-    GROUP BY EXTRACT(HOUR FROM S.date),
-    TB.chair_count,
-    TT.chairs
-
-    HAVING
-      COUNT(S.date) >= TT.chairs
-  `
   // Aqui foi ajustado manualmente o fuso horário (-3 horas)
-  const blockedHours = blockedHoursRaw.map((item) => item.hour - 3)
+  const blockedHours = blockedHoursRaw.map((item) => item.hour - timeZoneDiff)
 
   const availableTimes = possibleTimes.filter((time) => {
     const isTimeBlocked = blockedHours.some((hour) => hour === time)

@@ -61,8 +61,6 @@ export async function GET(request: NextRequest) {
       COUNT(S.date) >= (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TT.chairs );
   `
 
-  console.log(blockedDatesRaw)
-
   const blockedDates = blockedDatesRaw.map((item) => Number(item.date))
 
   return Response.json({ blockedWeekDays, blockedDates, startDay, lastDay })

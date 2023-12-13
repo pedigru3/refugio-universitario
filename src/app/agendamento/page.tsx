@@ -77,11 +77,13 @@ export default function Agendamento() {
       return
     }
 
+    const setTime = dayjs(selectedDate)
+      .set('hour', hour.current)
+      .startOf('hour')
+      .format()
+
     const body = {
-      date: dayjs(selectedDate)
-        .set('hour', hour.current)
-        .startOf('hour')
-        .toDate(),
+      date: setTime,
       table_id: tableId,
     }
 
