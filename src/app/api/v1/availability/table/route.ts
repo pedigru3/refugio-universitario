@@ -5,6 +5,7 @@ import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTimeZone from 'dayjs/plugin/timezone'
 
 import { type NextRequest } from 'next/server'
+import { getTimeZoneOffset } from '@/utils/get-time-zone-offset'
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(dayjsTimeZone)
@@ -25,11 +26,13 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Hour not provided.' }, { status: 400 })
     }
 
+    const timeDiff = getTimeZoneOffset()
+
     const referenceDate = dayjs
       .utc(String(dateParam))
-      .set('hour', Number(hourParam))
+      .set('hour', Number(hourParam) + timeDiff)
 
-    console.log('DATA ATUAL: ', referenceDate.format())
+    // console.log('DATA ATUAL', referenceDate.toDate())
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())
