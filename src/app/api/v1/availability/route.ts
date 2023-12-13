@@ -117,8 +117,6 @@ export async function GET(request: NextRequest) {
   WHERE HC.amount >= TT.chairs;
 `
 
-  console.log(blockedHoursRaw)
-
   // Aqui foi ajustado manualmente o fuso horário (-3 horas)
   const blockedHours = blockedHoursRaw.map((item) => item.hour - timeZoneDiff)
 

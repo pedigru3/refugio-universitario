@@ -1,8 +1,13 @@
 /* eslint-disable camelcase */
 import { prisma } from '@/lib/prisma'
-import { getTimeZoneOffset } from '@/utils/get-time-zone-offset'
 import dayjs from 'dayjs'
+import dayjsUtc from 'dayjs/plugin/utc'
+import dayjsTimeZone from 'dayjs/plugin/timezone'
+
 import { type NextRequest } from 'next/server'
+
+dayjs.extend(dayjsUtc)
+dayjs.extend(dayjsTimeZone)
 
 // Define the handler for the GET request
 export async function GET(request: NextRequest) {
@@ -20,10 +25,9 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Hour not provided.' }, { status: 400 })
     }
 
-    const referenceDate = dayjs(String(dateParam)).set(
-      'hour',
-      Number(hourParam),
-    )
+    const referenceDate = dayjs(String(dateParam))
+      .set('hour', Number(hourParam))
+      .tz('America/Sao_Paulo')
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())
@@ -92,6 +96,7 @@ export async function GET(request: NextRequest) {
     })
     return Response.json({ availability: availabilityTables })
   } catch (error) {
+    console.log(error)
     return Response.json(
       { error: 'Something unexpected happened' },
       { status: 500 },
