@@ -27,7 +27,7 @@ export function CloseButton({ onClick }: CloseButtomProps) {
             <Dialog.Close className="w-full" asChild>
               <button
                 onClick={() => handleClick(true)}
-                className="h-10 w-full text-black bg-red-500 rounded-md"
+                className="h-10 w-full text-white bg-purple-500 rounded-md"
               >
                 Sim
               </button>
@@ -35,7 +35,7 @@ export function CloseButton({ onClick }: CloseButtomProps) {
             <Dialog.Close className="w-full" asChild>
               <button
                 onClick={() => handleClick(false)}
-                className="h-10 w-full text-black bg-blue-500 rounded-md"
+                className="h-10 w-full text-white bg-purple-800 rounded-md"
               >
                 Não
               </button>

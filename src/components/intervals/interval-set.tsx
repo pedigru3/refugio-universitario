@@ -3,7 +3,6 @@
 import { ReactNode } from 'react'
 
 export function IntervalSet({
-  children,
   disabled,
   innerRef,
 }: {

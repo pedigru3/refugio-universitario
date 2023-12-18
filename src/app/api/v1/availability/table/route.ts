@@ -5,7 +5,6 @@ import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTimeZone from 'dayjs/plugin/timezone'
 
 import { type NextRequest } from 'next/server'
-import { getTimeZoneOffset } from '@/utils/get-time-zone-offset'
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(dayjsTimeZone)
@@ -26,11 +25,10 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Hour not provided.' }, { status: 400 })
     }
 
+    // Added 3 hours cause the American/Sao_Paulo Timezone
     const referenceDate = dayjs
       .utc(String(dateParam))
       .set('hour', Number(hourParam) + 3)
-
-    console.log('DATA ATUAL', referenceDate.toDate())
 
     // Check if the reference date is in the past; if so, return a response indicating an old date
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())
@@ -99,7 +97,6 @@ export async function GET(request: NextRequest) {
     })
     return Response.json({ availability: availabilityTables })
   } catch (error) {
-    console.log(error)
     return Response.json(
       { error: 'Something unexpected happened' },
       { status: 500 },

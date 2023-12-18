@@ -7,7 +7,9 @@ export function DialogComponent({
   isOpen,
   onOpenChange,
   onClose,
+  message,
 }: {
+  message: string
   isOpen: boolean
   onOpenChange: (state: boolean) => void
   onClose: () => void
@@ -22,11 +24,9 @@ export function DialogComponent({
         />
         <Dialog.Content
           onEscapeKeyDown={onClose}
-          className='className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none'
+          className=' className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none'
         >
-          <Dialog.Title className="text-black">
-            Dados atualizados com sucesso
-          </Dialog.Title>
+          <Dialog.Title className="text-black">{message}</Dialog.Title>
           <Dialog.Description />
           <Dialog.Close asChild>
             <button

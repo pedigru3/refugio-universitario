@@ -32,15 +32,14 @@ type TableFormInput = z.input<typeof tableFormSchema>
 type TableFormOutput = z.output<typeof tableFormSchema>
 
 export function TableForm() {
-  const {
-    data: dataTables,
-    isLoading,
-    mutate,
-  } = useSWR<DataTables>('tables', async () => {
-    const response = await fetch('/api/v1/tables')
-    const json = await response.json()
-    return json
-  })
+  const { data: dataTables, mutate } = useSWR<DataTables>(
+    'tables',
+    async () => {
+      const response = await fetch('/api/v1/tables')
+      const json = await response.json()
+      return json
+    },
+  )
 
   const {
     handleSubmit,

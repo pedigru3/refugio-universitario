@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import dayjs from 'dayjs'
 import { CloseButton } from './close-button'
 import { Loading } from '@/components/loading'
+import { useState } from 'react'
 
 type Appointments = {
   id: string
@@ -16,6 +17,7 @@ type Appointments = {
 
 export function MyAppointments() {
   const session = useSession()
+  const [reloading, setReloading] = useState(false)
 
   const {
     data: appointments,
@@ -36,14 +38,16 @@ export function MyAppointments() {
 
   async function handleCloseButton(wasConfirmed: boolean, id: string) {
     if (wasConfirmed) {
+      setReloading(true)
       await fetch(`/api/v1/scheduling/${session.data?.user.username}/${id}`, {
         method: 'DELETE',
       })
-      mutate()
+      await mutate()
+      setReloading(false)
     }
   }
 
-  if (isLoading) {
+  if (isLoading || reloading) {
     return <Loading />
   }
 
@@ -51,9 +55,16 @@ export function MyAppointments() {
     return <div>no appointments</div>
   }
 
+  if (appointments.length === 0) {
+    return (
+      <div className="mt-10">
+        <p>Você não tem nenhum agendamento ainda</p>
+      </div>
+    )
+  }
+
   return (
     <div className="mt-10">
-      <h3 className="text-2xl font-bold mb-5">Minhas reservas</h3>
       {appointments.map((appointment) => {
         const dateAppointment = dayjs(appointment.date)
         return (

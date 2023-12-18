@@ -12,6 +12,7 @@ import { useRef, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { Title } from '@/components/title'
+import { DialogComponent } from '@/components/dialog'
 
 interface Availability {
   possibleTimes: number[]
@@ -29,6 +30,7 @@ interface AvailabilityTables {
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
   const [isSending, setIsSending] = useState(false)
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
 
   const router = useRouter()
 
@@ -74,7 +76,7 @@ export default function Agendamento() {
   async function handleSendingForm() {
     setIsSending(true)
     if (!selectedDate || !hour.current || tableId === '') {
-      return
+      return setIsSending(false)
     }
 
     const setTime = dayjs(selectedDate)
@@ -96,8 +98,9 @@ export default function Agendamento() {
     )
 
     if (response.ok) {
-      setIsSending(false)
       return router.push('/agendamento/success')
+    } else {
+      setIsAlertOpen(true)
     }
 
     setIsSending(false)
@@ -220,6 +223,14 @@ export default function Agendamento() {
                   >
                     Confirmar
                   </Button>
+                  <DialogComponent
+                    message={
+                      'Algo deu errado. Verifique se você já não tem uma reserva nesse horário ou tente novamente mais tarde.'
+                    }
+                    isOpen={isAlertOpen}
+                    onOpenChange={(state) => console.log(state)}
+                    onClose={() => setIsAlertOpen(false)}
+                  />
                 </div>
               </div>
             </div>

@@ -192,6 +192,7 @@ export function IntervalForm() {
         <Button isLoading={isSubmitting}>Concluir</Button>
 
         <DialogComponent
+          message="Dados atualizados"
           isOpen={isAlertOpen}
           onOpenChange={(state) => console.log(state)}
           onClose={() => setIsAlertOpen(false)}

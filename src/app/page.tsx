@@ -74,9 +74,12 @@ export default async function Home() {
         </Container>
         <Container>
           <div className="pt-10 text-gray-500 leading-8 mb-10">
-            <Title color="dark" type="h2">
-              Conheça nosso espaço de estudo
-            </Title>
+            <div className="max-w-[16rem] md:max-w-none">
+              <Title color="dark" type="h2">
+                Conheça nosso espaço de estudo
+              </Title>
+            </div>
+
             <p className="pt-5">
               Estamos localizados perto da UEL (Universidade Estadual de
               Londrina), dentro do Condomínio Universitário. Utilizamos o espaço

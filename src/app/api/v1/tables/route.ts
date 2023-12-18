@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { NextApiRequest } from 'next'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { authOptions } from '../../auth/[...nextauth]/options'
