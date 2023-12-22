@@ -131,7 +131,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.log(error)
     return Response.json(
-      { error: 'Something unexpected happened' },
+      { error: `Something unexpected happened: ${error}` },
       { status: 500 },
     )
   }
