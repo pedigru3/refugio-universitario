@@ -2,6 +2,7 @@
 
 import { menuList } from '@/consts/menuList'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export function MenuDesktop() {
@@ -15,39 +16,40 @@ export function MenuDesktop() {
         {menuList.map((menu) => {
           return (
             <li key={menu.link}>
-              <a
+              <Link
                 className={`${
                   pathName !== menu.link && 'opacity-70 hover:opacity-100'
                 } transition-all duration-500  `}
                 href={menu.link}
               >
                 {menu.title}
-              </a>
+              </Link>
             </li>
           )
         })}
         {session?.user && (
           <li>
-            <a
+            <Link
               className={`${
                 pathName !== '/profile' && 'opacity-70 hover:opacity-100'
               } transition-all duration-500  `}
               href={'/profile'}
             >
               {'Perfil'}
-            </a>
+            </Link>
           </li>
         )}
         {session?.user.role === 'admin' && (
           <li>
-            <a
+            <Link
+              prefetch
               className={`${
                 pathName !== '/admin' && 'opacity-70 hover:opacity-100'
               } transition-all duration-500  `}
               href={'/admin'}
             >
               {'Admin'}
-            </a>
+            </Link>
           </li>
         )}
       </ul>

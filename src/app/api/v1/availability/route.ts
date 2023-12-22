@@ -6,6 +6,11 @@ import { type NextRequest } from 'next/server'
 import { authOptions } from '../../auth/[...nextauth]/options'
 import { z } from 'zod'
 import { getTimeZoneOffset } from '@/utils/get-time-zone-offset'
+import dayjsUtc from 'dayjs/plugin/utc'
+import dayjsTimeZone from 'dayjs/plugin/timezone'
+
+dayjs.extend(dayjsUtc)
+dayjs.extend(dayjsTimeZone)
 
 const timeIntervalSchema = z.object({
   weekDay: z.number(),
@@ -122,7 +127,10 @@ export async function GET(request: NextRequest) {
 
   const availableTimes = possibleTimes.filter((time) => {
     const isTimeBlocked = blockedHours.some((hour) => hour === time)
-    const isTimeInPast = referenceDate.set('hour', time).isBefore(new Date())
+    const isTimeInPast = referenceDate
+      .utc()
+      .set('hour', time + 3)
+      .isBefore(new Date())
 
     return !isTimeBlocked && !isTimeInPast
   })

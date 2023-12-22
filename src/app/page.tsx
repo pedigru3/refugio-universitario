@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { BulletIcon } from '@/components/bullet-icon'
 import { Title } from '@/components/title'
 
-export default async function Home() {
+export default function Home() {
   return (
     <>
       <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end min-h-[650px] w-full">
