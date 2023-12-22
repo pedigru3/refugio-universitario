@@ -102,7 +102,7 @@ export default function Agendamento() {
       return router.push('/agendamento/success')
     } else {
       const body = await response.json()
-      setErrorMessage(body)
+      setErrorMessage(JSON.stringify(body))
       setIsAlertOpen(true)
     }
 
