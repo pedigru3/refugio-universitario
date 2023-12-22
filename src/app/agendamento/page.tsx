@@ -31,6 +31,7 @@ export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
   const [isSending, setIsSending] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const router = useRouter()
 
@@ -100,6 +101,8 @@ export default function Agendamento() {
     if (response.ok) {
       return router.push('/agendamento/success')
     } else {
+      const body = await response.json()
+      setErrorMessage(body)
       setIsAlertOpen(true)
     }
 
@@ -225,6 +228,7 @@ export default function Agendamento() {
                   </Button>
                   <DialogComponent
                     message={
+                      errorMessage ??
                       'Algo deu errado. Verifique se você já não tem uma reserva nesse horário ou tente novamente mais tarde.'
                     }
                     isOpen={isAlertOpen}
