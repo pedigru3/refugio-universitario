@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { google } from 'googleapis'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
+import { calendar_v3 as calendarV3 } from 'googleapis/build/src/apis/calendar/v3'
 
 type RouteParams = {
   params: { username: string }
@@ -74,6 +75,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     table_id: z.string(),
   })
 
+  let calendar: calendarV3.Calendar
+
+  try {
+    calendar = google.calendar({
+      version: 'v3',
+      auth: await getGoogleOAuthToken(userExists.id),
+    })
+  } catch (error) {
+    console.log('error: ', error)
+    return Response.json(
+      { error: `Error with Google Calendar` },
+      { status: 401 },
+    )
+  }
+
   try {
     const bory = await request.json()
     const { date, table_id: tableId } = BorySchema.parse(bory)
@@ -95,22 +111,16 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    const [scheduling, calendar] = await Promise.all([
-      prisma.scheduling.create({
-        data: {
-          date,
-          user_id: userExists.id,
-          table_id: tableId,
-        },
-        include: {
-          table: true,
-        },
-      }),
-      google.calendar({
-        version: 'v3',
-        auth: await getGoogleOAuthToken(userExists.id),
-      }),
-    ])
+    const scheduling = await prisma.scheduling.create({
+      data: {
+        date,
+        user_id: userExists.id,
+        table_id: tableId,
+      },
+      include: {
+        table: true,
+      },
+    })
 
     await calendar.events.insert({
       calendarId: 'primary',
@@ -131,7 +141,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.log(error)
     return Response.json(
-      { error: `Something unexpected happened: ${error}` },
+      { error: `Something unexpected happened` },
       { status: 500 },
     )
   }
