@@ -45,6 +45,12 @@ export default function SignUp() {
         isLoading={isLoading}
         onClick={() => {
           setIsLoading(true)
+          fetch('/api/v1/send', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: session.data?.user.email,
+            }),
+          })
           router.push('/signup/connect-google/success')
         }}
       >
