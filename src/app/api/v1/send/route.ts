@@ -9,8 +9,6 @@ const sendEmailBodySchema = z.object({
   email: z.string().email(),
 })
 
-type SendEmailBodySchema = z.infer<typeof sendEmailBodySchema>
-
 export async function POST(req: Request) {
   const body = await req.json()
   const session = await getServerSession(authOptions)
