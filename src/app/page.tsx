@@ -6,6 +6,17 @@ import Link from 'next/link'
 import { BulletIcon } from '@/components/bullet-icon'
 import { Title } from '@/components/title'
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  openGraph: {
+    type: 'website',
+    images: [
+      'https://www.refugiouniversitario.com.br/_next/image?url=%2Frefugio-universitario.png&w=1200&q=75',
+    ],
+  },
+}
+
 export default function Home() {
   return (
     <>
