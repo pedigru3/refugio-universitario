@@ -10,7 +10,13 @@ type BulletIconProps = {
 export function BulletIcon({ iconPath, text, title, alt }: BulletIconProps) {
   return (
     <div className="pt-12">
-      <Image src={iconPath} width={64} height={64} alt={alt ?? title} />
+      <Image
+        src={iconPath}
+        width={64}
+        height={64}
+        style={{ objectFit: 'cover' }}
+        alt={alt ?? title}
+      />
       <h3
         className="text-gray-800 font-bold text-xl font-plus-jakarta-sans
       lg:text-2xl lg:pt-3
