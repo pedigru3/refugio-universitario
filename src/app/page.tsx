@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Refúgio Universitário',
     description: 'Lugar de acolhimento e uma possiblidade de família',
-    images: ['url/_next/image?url=%2Frefugio-universitario.png&w=1200&q=75'],
+    images: ['_next/image?url=%2Frefugio-universitario.png&w=1200&q=75'],
   },
 }
 
