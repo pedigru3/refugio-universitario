@@ -120,6 +120,16 @@ export default function Home() {
           </Container>
         </div>
       </main>
+      <footer className="bg-white text-black justify-center text-center p-5 text-sm">
+        Confira nossa{' '}
+        <Link className="underline" href={'/privacy-policy'}>
+          Política de Privacidade
+        </Link>{' '}
+        e{' '}
+        <Link className="underline" href={'/privacy-policy/term'}>
+          Termos de Uso
+        </Link>
+      </footer>
     </>
   )
 }
