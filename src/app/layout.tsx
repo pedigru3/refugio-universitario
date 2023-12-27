@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     images: ['https://refugiouniversitario.com.br/refugio-universitario.png'],
   },
 }
+
 export default async function RootLayout({
   children,
 }: {
