@@ -8,13 +8,11 @@ export default function SignUpLayout({
   children: React.ReactNode
 }) {
   return (
-    <div>
-      <div className="bg-purple-700">
+    <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end">
+      <div className="shadow-lg">
         <Header />
       </div>
-      <div className="bg-gradient-to-br from-purple-900 via-purple-700 to-purple-400 w-full min-h-screen py-5">
-        {children}
-      </div>
+      <div className=" w-full min-h-screen py-5">{children}</div>
     </div>
   )
 }

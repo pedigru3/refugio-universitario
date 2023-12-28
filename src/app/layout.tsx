@@ -29,7 +29,7 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions)
 
   return (
-    <html className="bg-blue-950" lang="pt-br">
+    <html className="" lang="pt-br">
       <body className={`${inter.className} ${plusJakartaSans.variable}`}>
         <AuthProvider session={session}>{children}</AuthProvider>
       </body>

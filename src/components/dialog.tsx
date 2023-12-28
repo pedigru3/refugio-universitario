@@ -20,7 +20,7 @@ export function DialogComponent({
       <Dialog.Portal>
         <Dialog.Overlay
           onClick={onClose}
-          className="bg-black opacity-30 data-[state=open]:animate-overlayShow fixed inset-0"
+          className="bg-black opacity-50 data-[state=open]:animate-overlayShow fixed inset-0"
         />
         <Dialog.Content
           onEscapeKeyDown={onClose}

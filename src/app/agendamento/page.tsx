@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { Title } from '@/components/title'
 import { TimePickerComponent } from './components/timer-picker'
 import { TablePickerComponent } from './components/table-picker'
+import { DialogComponent } from '@/components/dialog'
 
 export interface Availability {
   possibleTimes: number[]
@@ -161,6 +162,12 @@ export default function Agendamento() {
           tableId={tableId}
         />
       )}
+      <DialogComponent
+        isOpen={isAlertOpen}
+        onOpenChange={(value) => setIsAlertOpen(value)}
+        message="Ops! Algo deu errado. Verifique se já não há uma reserva sua nesse horário."
+        onClose={() => setIsAlertOpen(false)}
+      />
     </Container>
   )
 }

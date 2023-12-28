@@ -5,7 +5,13 @@ import { signIn } from 'next-auth/react'
 
 export default function SignUp() {
   async function handleSignIn() {
-    await signIn('google')
+    console.log('login google')
+    try {
+      await signIn('google')
+    } catch (error) {
+      console.log(error)
+      throw Error('erro')
+    }
   }
 
   return (

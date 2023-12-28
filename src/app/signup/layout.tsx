@@ -2,6 +2,7 @@
 
 import { Container } from '@/components/container'
 import { Header } from '@/components/header'
+import LayoutPattern from '@/components/layout-pattern'
 import { usePathname } from 'next/navigation'
 
 export default function SignUpLayout({
@@ -15,11 +16,12 @@ export default function SignUpLayout({
   const hasStepThree = pathName.includes('/signup/connect-google/success')
 
   return (
-    <div className="bg-purple-700 h-screen">
-      <Header />
-      <div className=" bg-gradient-to-br from-purple-900 via-purple-700 to-purple-400 h-full w-full py-5">
+    <LayoutPattern>
+      <div className=" py-10">
         <Container>
-          <h1 className="text-white text-2xl font-medium mb-5">Inscrição</h1>
+          <h1 className="text-white text-2xl md:text-3xl font-medium mb-5">
+            Inscrição
+          </h1>
           <p className="text-sm">
             Passo {hasStepThree ? '3' : hasStepTwo ? '2' : '1'} de 3
           </p>
@@ -39,6 +41,6 @@ export default function SignUpLayout({
           <div className="max-w-[670px]">{children}</div>
         </Container>
       </div>
-    </div>
+    </LayoutPattern>
   )
 }
