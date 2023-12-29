@@ -19,9 +19,6 @@ export default async function AdminPage() {
   if (isAuth) {
     return (
       <div className="mb-10">
-        <div className="shadow-lg">
-          <Header />
-        </div>
         <Container>
           <div className="grid gird-cols-1 lg:grid-cols-2 lg:gap-5">
             <IntervalForm />
