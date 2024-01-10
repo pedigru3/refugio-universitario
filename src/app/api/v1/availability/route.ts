@@ -29,8 +29,6 @@ const timeIntervalsBodySchema = z.object({
   startDay: z.string(),
 })
 
-// type TimeInterval = z.infer<typeof timeIntervalsBodySchema>
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
 

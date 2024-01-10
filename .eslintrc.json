@@ -1,24 +1,3 @@
 {
-  "plugins": ["@ts-safeql/eslint-plugin"],
-  "extends": ["next/core-web-vitals", "@rocketseat/eslint-config/react", "plugin:jest-dom/recommended"],
-  "rules": {
-    "@ts-safeql/check-sql": [
-      "error",
-      {
-        "connections": [
-          {
-            // The migrations path:
-            "migrationsDir": "./prisma/migrations",
-            "targets": {
-              // The sql tags that should be checked.
-              // either `db.$queryRaw` or `db.$executeRaw`:
-              "tag": "prisma.+($queryRaw|$executeRaw)",
-              // Transform the query result to array
-              "transform": "{type}[]"
-            }
-          }
-        ]
-      }
-    ]
-  }
+  "extends": ["next/core-web-vitals", "@rocketseat/eslint-config/react", "plugin:jest-dom/recommended"] 
 }

@@ -1,10 +1,12 @@
 import { prisma } from '@/lib/prisma'
+import { convertNumberTwoDigitsString } from '@/utils/convert-number-two-digits-string'
 import { type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const year = searchParams.get('year')
-  const month = searchParams.get('month')
+  const paramsMonth = searchParams.get('month')
+  const month = convertNumberTwoDigitsString(paramsMonth)
 
   if (!year || !month) {
     return Response.json(

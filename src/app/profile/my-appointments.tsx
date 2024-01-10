@@ -1,29 +1,19 @@
 'use client'
 
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { useSession } from 'next-auth/react'
 import dayjs from 'dayjs'
 import { CloseButton } from './close-button'
 import { Loading } from '@/components/loading'
-import { useState } from 'react'
+import { Appointment } from '@/models/appointment'
 
-type Appointments = {
-  id: string
-  table: {
-    table_name: string
-  }
-  date: string
-}[]
+type Appointments = Appointment[]
 
 export function MyAppointments() {
   const session = useSession()
-  const [reloading, setReloading] = useState(false)
+  const { mutate } = useSWRConfig()
 
-  const {
-    data: appointments,
-    isLoading,
-    mutate,
-  } = useSWR<Appointments>(
+  const { data: appointments, isLoading } = useSWR<Appointments>(
     ['scheduling', session.data?.user.username],
     fetchAppointments,
   )
@@ -36,18 +26,38 @@ export function MyAppointments() {
     return json.appointments
   }
 
+  async function deleteAppointment(id: string) {
+    await fetch(`/api/v1/scheduling/${session.data?.user.username}/${id}`, {
+      method: 'DELETE',
+    })
+    const response = await fetch(
+      `/api/v1/scheduling/${session.data?.user.username}`,
+    )
+    const json = await response.json()
+    return json.appointments
+  }
+
   async function handleCloseButton(wasConfirmed: boolean, id: string) {
     if (wasConfirmed) {
-      setReloading(true)
-      await fetch(`/api/v1/scheduling/${session.data?.user.username}/${id}`, {
-        method: 'DELETE',
-      })
-      await mutate()
-      setReloading(false)
+      const appointment = appointments?.filter(
+        (appointment) => appointment.id !== id,
+      )
+      const options = {
+        optimisticData: appointment,
+        rollbackOnError(error: any) {
+          // If it's timeout abort error, don't rollback
+          return error.name !== 'AbortError'
+        },
+      }
+      mutate(
+        ['scheduling', session.data?.user.username],
+        deleteAppointment(id),
+        options,
+      )
     }
   }
 
-  if (isLoading || reloading) {
+  if (isLoading) {
     return <Loading />
   }
 

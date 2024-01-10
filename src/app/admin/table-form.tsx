@@ -60,7 +60,7 @@ export function TableForm() {
 
   return (
     <div className="mt-10 max-w-[600px]">
-      <h2 className=" font-bold lg:mb-10">Mesas Disponíveis</h2>
+      <h2 className=" font-bold lg:mb-10 text-lg">Mesas Disponíveis</h2>
       <div className="border border-gray-400 rounded-md">
         {dataTables &&
           dataTables.tables.map((table) => (
@@ -74,7 +74,7 @@ export function TableForm() {
           ))}
       </div>
       <div className="pt-4">
-        <h2 className="my-2 font-bold lg:mb-5">Adicionar Mesa</h2>
+        <h2 className="my-2 font-bold lg:mb-5 text-lg">Adicionar Mesa</h2>
         <form
           onSubmit={handleSubmit(handleAddTable)}
           className="grid grid-cols-3 gap-2 border-l py-2 px-2"

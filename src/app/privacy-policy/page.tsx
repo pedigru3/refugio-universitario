@@ -59,6 +59,18 @@ export default function PrivacyPolicy() {
             confirmação de reservas, atualizações sobre o site e informações
             relevantes para os usuários.
           </p>
+          <p>
+            2.4. <strong>Política de Uso Limitado: </strong>O uso e a
+            transferência (do aplicativo) para qualquer outro aplicativo de
+            informações recebidas das APIs do Google obedecerão à{' '}
+            <a
+              className="underline"
+              href="https://developers.google.com/terms/api-services-user-data-policy"
+            >
+              Política de dados do usuário dos serviços de API do Google
+            </a>
+            , incluindo os requisitos de uso limitado.”
+          </p>
         </section>
 
         {/* Seção 3: Compartilhamento de Informações */}
@@ -75,7 +87,6 @@ export default function PrivacyPolicy() {
             3.2. <strong>Calendário Google: </strong> Ao reservar, as
             informações serão sincronizadas com o Calendário do Google.
           </p>
-          {/* Adicione outras subseções conforme necessário */}
         </section>
 
         {/* Seção 4: Segurança das Informações */}

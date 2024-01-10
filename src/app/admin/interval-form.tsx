@@ -122,7 +122,7 @@ export function IntervalForm() {
 
   return (
     <div className="mt-10 max-w-[600px]">
-      <h1 className="mb-10">Bem-vindo de volta!</h1>
+      <h1 className="mb-10 text-lg font-bold">Bem-vindo de volta!</h1>
       <form
         onSubmit={handleSubmit(handleSetTimeIntervals)}
         className="mt-6 flex flex-col"

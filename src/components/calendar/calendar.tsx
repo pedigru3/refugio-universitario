@@ -60,7 +60,6 @@ export function Calendar({ selectDate, onDateSelected }: CalendarProps) {
       )
 
       const json = await response.json()
-
       return json
     },
   )

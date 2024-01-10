@@ -2,6 +2,7 @@
 
 import { SignUpForm } from '@/components/signup-form'
 import { signIn } from 'next-auth/react'
+import Image from 'next/image'
 
 export default function SignUp() {
   async function handleSignIn() {
@@ -17,13 +18,26 @@ export default function SignUp() {
   return (
     <div>
       <SignUpForm />
-      <button
-        className="border-b-2 border-yellow-200 text-yellow-200 flex 
-        mx-auto mt-5 justify-center items-center"
-        onClick={handleSignIn}
-      >
-        Já tem uma conta? Entrar.
-      </button>
+      <div className="mt-10 flex flex-col items-center justify-center dark:bg-gray-800 gap-2">
+        Já é inscrito? Entre aqui:
+        <button
+          onClick={handleSignIn}
+          className="bg-white px-3 py-[10px] border flex justify-center text-center items-center gap-[10px]
+           border-slate-200 dark:border-slate-700 rounded-[4px]
+            text-slate-700 dark:text-slate-200 hover:border-slate-400
+             dark:hover:border-slate-500 hover:text-slate-900
+              dark:hover:text-slate-300 hover:shadow transition duration-150"
+        >
+          <Image
+            width={20}
+            height={20}
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            loading="lazy"
+            alt="google logo"
+          />
+          <span className="text-sm font-bold">Sign in with Google</span>
+        </button>
+      </div>
     </div>
   )
 }

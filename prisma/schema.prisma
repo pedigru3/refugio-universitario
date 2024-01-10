@@ -98,3 +98,8 @@ model AvailableSchedule {
 
   @@map("available_schedules")
 }
+
+model BlockedDates {
+  id   String   @id @default(uuid())
+  date DateTime
+}
