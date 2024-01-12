@@ -1,5 +1,4 @@
 import { Container } from '@/components/container'
-import { Title } from '@/components/title'
 
 export default function PrivacyPolicy() {
   return (

@@ -18,15 +18,15 @@ export default function SignUp() {
   return (
     <div>
       <SignUpForm />
-      <div className="mt-10 flex flex-col items-center justify-center dark:bg-gray-800 gap-2">
+      <div className="mt-10 flex flex-col items-center justify-center gap-2">
         Já é inscrito? Entre aqui:
         <button
           onClick={handleSignIn}
           className="bg-white px-3 py-[10px] border flex justify-center text-center items-center gap-[10px]
-           border-slate-200 dark:border-slate-700 rounded-[4px]
-            text-slate-700 dark:text-slate-200 hover:border-slate-400
-             dark:hover:border-slate-500 hover:text-slate-900
-              dark:hover:text-slate-300 hover:shadow transition duration-150"
+           border-slate-200 rounded-[4px]
+            text-slate-700 hover:border-slate-400
+             hover:text-slate-900
+             hover:shadow transition duration-150"
         >
           <Image
             width={20}
