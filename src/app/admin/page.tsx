@@ -1,13 +1,10 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../api/auth/[...nextauth]/options'
 import { redirect } from 'next/navigation'
-import { Header } from '@/components/header'
-
 import { Metadata } from 'next'
 import { IntervalForm } from './interval-form'
 import { TableForm } from './table-form'
 import { Container } from '@/components/container'
-import { BlockedDays } from './blocked-days'
 
 export const metadata: Metadata = {
   title: 'Settings',
@@ -23,10 +20,6 @@ export default async function AdminPage() {
         <Container>
           <div className="grid gird-cols-1 lg:grid-cols-2 lg:gap-5">
             <IntervalForm />
-            <div>
-              <TableForm />
-              <BlockedDays />
-            </div>
           </div>
         </Container>
       </div>

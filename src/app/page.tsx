@@ -60,7 +60,7 @@ export default function Home() {
               iconPath="/conect.png"
               text={`Mais que uma boa conexão de internet, queremos ter aqui uma boa
           conexão de pessoas. Um espaço onde você possa se conectar com outras
-          pessoas que possuiem o mesmo objetivo que o seu e vão te ajudar no trajeto.`}
+          pessoas que possuem o mesmo objetivo que o seu e vão te ajudar no trajeto.`}
             />
             <BulletIcon
               title="Comunidade solidária"
