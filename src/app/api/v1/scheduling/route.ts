@@ -3,9 +3,10 @@ import { authOptions } from '../../auth/[...nextauth]/options'
 import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
 
-interface GroupedScheduling {
-  [date: string]: { user: string; name: string; hours: string[] }[]
-}
+type GroupedScheduling = {
+  date: string
+  schedules: { user: string; name: string; hours: string[] }[]
+}[]
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -31,29 +32,33 @@ export async function GET() {
     },
   })
 
-  const groupedScheduling: GroupedScheduling = {}
+  const groupedScheduling: GroupedScheduling = []
 
   scheduling.forEach((entry) => {
     const date = dayjs(entry.date).format('DD/MM/YY')
     const hour = dayjs(entry.date).format('HH')
     const user = entry.user
 
-    if (!groupedScheduling[date]) {
-      groupedScheduling[date] = [
-        {
-          user: user.username,
-          name: user.name,
-          hours: [hour],
-        },
-      ]
+    if (!groupedScheduling.find((item) => item.date === date)) {
+      groupedScheduling.push({
+        date,
+        schedules: [
+          {
+            user: user.username,
+            name: user.name,
+            hours: [hour],
+          },
+        ],
+      })
     } else {
-      const existingEntry = groupedScheduling[date].find(
+      const existingDate = groupedScheduling.find((item) => item.date === date)
+      const existingEntry = existingDate?.schedules.find(
         (item) => item.user === user.username,
       )
       if (existingEntry) {
         existingEntry.hours.push(hour)
       } else {
-        groupedScheduling[date].push({
+        existingDate?.schedules.push({
           user: user.username,
           name: user.name,
           hours: [hour],
