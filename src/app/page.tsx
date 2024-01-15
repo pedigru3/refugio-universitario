@@ -80,27 +80,42 @@ export default function Home() {
               </Title>
             </div>
 
-            <p className="pt-5">
-              Estamos localizados perto da UEL (Universidade Estadual de
-              Londrina), dentro do Condomínio Universitário. Utilizamos o espaço
-              cedido pela Igreja Batista Catuaí (R. Rubéns Ávila, 150). Contamos
-              com:
-            </p>
-            <p className="pt-2">
-              <span className="font-bold">Espaço Café:</span> Temos um local
-              para você tomar café e se alimentar para se manter focado nos
-              estudos.
-            </p>
-            <p className="pt-2">
-              <span className="font-bold">Espaço Conexão:</span> Ideal para
-              estudos em grupo e criar novas amizades, o local dispõe de sofás,
-              mesas e cadeiras e fica bem pertinho do nosso café.
-            </p>
-            <p className="pt-2">
-              <span className="font-bold">Espaço Concentração:</span> Para
-              quando você quiser ficar mais focado e precisar de mais
-              concentração, temos uma sala mais tranquila e sem distrações.
-            </p>
+            <div className="flex flex-col lg:flex-row lg:gap-10">
+              <Image
+                className="pt-5 object-cover hidden lg:flex w-2/3"
+                src={'/espaco-concentracao-1.jpg'}
+                width={800}
+                height={800}
+                alt="Espaço Concentração - Refúgio universitário"
+              ></Image>
+              <Image
+                className="pt-5 object-cover lg:hidden"
+                src={'/espaco-concentracao-1.jpg'}
+                width={450}
+                height={450}
+                alt="Espaço Concentração - Refúgio universitário"
+              ></Image>
+              <div>
+                <p className="pt-5">
+                  Estamos localizados perto da UEL (Universidade Estadual de
+                  Londrina), dentro do Condomínio Universitário. Utilizamos o
+                  espaço cedido pela Igreja Batista Catuaí (R. Rubéns Ávila,
+                  150). Contamos com:
+                </p>
+                <p className="pt-2">
+                  <span className="font-bold">Espaço Café:</span> Temos um local
+                  para você tomar café, bater um papo e interagir com outros
+                  estudantes.
+                </p>
+
+                <p className="pt-2">
+                  <span className="font-bold">Espaço Concentração:</span> Temos
+                  um espaço especialmente para manter o seu foco nos estudos,
+                  equipado com mesas e sofás para garantir seu conforto enquanto
+                  se concentra nas tarefas acadêmicas.
+                </p>
+              </div>
+            </div>
           </div>
         </Container>
         <div className="bg-gray-800">
