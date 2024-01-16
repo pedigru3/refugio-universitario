@@ -3,7 +3,6 @@ import { authOptions } from '../api/auth/[...nextauth]/options'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { IntervalForm } from './interval-form'
-import { TableForm } from './table-form'
 import { Container } from '@/components/container'
 
 export const metadata: Metadata = {

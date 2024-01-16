@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { authOptions } from '../../auth/[...nextauth]/options'
+import { NextRequest } from 'next/server'
 
 const tableFormSchema = z.object({
   table_name: z
@@ -42,4 +43,33 @@ export async function POST(req: Request) {
   })
 
   return Response.json({})
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+
+  if (session?.user.role !== 'admin') {
+    return Response.json({}, { status: 401 })
+  }
+
+  const searchParams = req.nextUrl.searchParams
+  const id = searchParams.get('id')
+
+  if (!id || id === '') {
+    return Response.json({ error: 'id not found' }, { status: 400 })
+  }
+
+  try {
+    await prisma.table.delete({
+      where: {
+        id,
+      },
+    })
+    return Response.json({})
+  } catch (error) {
+    return Response.json(
+      { error: 'error when deleting table' },
+      { status: 500 },
+    )
+  }
 }

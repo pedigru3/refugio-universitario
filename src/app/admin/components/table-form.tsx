@@ -1,7 +1,12 @@
 'use client'
+import { DialogComponent } from '@/components/dialog'
+import { DialogConfirm } from '@/components/dialog-confirm'
 import { FormAnnotation } from '@/components/form-annotation'
 import { IntervalItem } from '@/components/intervals/interval-item'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { XCircle } from '@phosphor-icons/react'
+import { Dialog } from '@radix-ui/react-dialog'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import useSWR from 'swr'
 import { z } from 'zod'
@@ -32,6 +37,8 @@ type TableFormInput = z.input<typeof tableFormSchema>
 type TableFormOutput = z.output<typeof tableFormSchema>
 
 export function TableForm() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   const { data: dataTables, mutate } = useSWR<DataTables>(
     'tables',
     async () => {
@@ -53,8 +60,15 @@ export function TableForm() {
     const dataTable = data as TableFormOutput
     const body = JSON.stringify(dataTable)
 
-    await fetch('/api/v1/tables', { method: 'POST', body })
+    await fetch(`/api/v1/tables`, { method: 'POST', body })
 
+    mutate()
+  }
+
+  async function handleRemoveTable(id: string) {
+    await fetch(`/api/v1/tables?id=${id}`, {
+      method: 'DELETE',
+    })
     mutate()
   }
 
@@ -69,6 +83,20 @@ export function TableForm() {
               <div className="flex">
                 <p>Lugares:</p>
                 <p className="pl-2">{table.chair_count}</p>
+                <button className="pl-3" onClick={() => setIsDialogOpen(true)}>
+                  <XCircle className="hover:text-amber-400" size={23} />
+                </button>
+                <DialogConfirm
+                  isOpen={isDialogOpen}
+                  onClose={() => setIsDialogOpen(false)}
+                  onOpenChange={setIsDialogOpen}
+                  description="Você está prestes a deletar de uma vez por todas uma mesa. Agendamentos realizados nela serão perdidos."
+                  onButtonResponse={(isOk) => {
+                    if (isOk) {
+                      handleRemoveTable(table.id)
+                    }
+                  }}
+                />
               </div>
             </IntervalItem>
           ))}
