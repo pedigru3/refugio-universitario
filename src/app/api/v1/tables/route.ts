@@ -60,11 +60,18 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
+    await prisma.scheduling.deleteMany({
+      where: {
+        table_id: id,
+      },
+    })
+
     await prisma.table.delete({
       where: {
         id,
       },
     })
+
     return Response.json({})
   } catch (error) {
     return Response.json(
