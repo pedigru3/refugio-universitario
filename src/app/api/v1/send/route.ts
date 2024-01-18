@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         <p style="width: 100%; margin: auto;"><a href="[Link de Acesso]" style="display: block; padding: 15px 30px; margin: 20px auto; background-color: #A046F5; color: #fff; text-decoration: none; text-align: center; border-radius: 5px; font-size: 18px;">Acessar o Refúgio Universitário</a></p>
         <p style="color: #555; font-size: 18px; line-height: 1.3">Estamos animados para fazer parte da sua jornada educacional e ansiosos para ver seu sucesso no Refúgio Universitário.</p>
         <p style="color: #555; font-size: 18px; line-height: 1.3">Se precisar de qualquer assistência ou tiver alguma dúvida, não hesite em entrar em contato conosco. Boa sorte em seus estudos!</p>
-        <p style="color: #555; font-size: 18px; line-height: 1.3">Atenciosamente,<br>Felipe Ferreira</p>
+        <p style="color: #555; font-size: 18px; line-height: 1.3">Atenciosamente,<br>Equipe Refúgio</p>
       </td>
     </tr>
   </table>
