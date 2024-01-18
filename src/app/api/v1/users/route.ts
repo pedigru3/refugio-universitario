@@ -1,7 +1,15 @@
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
 import { cookies } from 'next/headers'
+import { authOptions } from '../../auth/[...nextauth]/options'
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+
+  if (session?.user.role !== 'admin') {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const users = await prisma.user.findMany({
     select: {
       username: true,

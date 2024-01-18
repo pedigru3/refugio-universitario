@@ -49,7 +49,7 @@ export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions)
 
   if (session?.user.role !== 'admin') {
-    return Response.json({}, { status: 401 })
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const searchParams = req.nextUrl.searchParams

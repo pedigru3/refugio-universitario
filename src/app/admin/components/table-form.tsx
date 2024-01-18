@@ -6,7 +6,7 @@ import { IntervalItem } from '@/components/intervals/interval-item'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { XCircle } from '@phosphor-icons/react'
 import { Dialog } from '@radix-ui/react-dialog'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import useSWR from 'swr'
 import { z } from 'zod'
@@ -38,6 +38,7 @@ type TableFormOutput = z.output<typeof tableFormSchema>
 
 export function TableForm() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const currentId = useRef('')
 
   const { data: dataTables, mutate } = useSWR<DataTables>(
     'tables',
@@ -83,24 +84,30 @@ export function TableForm() {
               <div className="flex">
                 <p>Lugares:</p>
                 <p className="pl-2">{table.chair_count}</p>
-                <button className="pl-3" onClick={() => setIsDialogOpen(true)}>
+                <button
+                  className="pl-3"
+                  onClick={() => {
+                    setIsDialogOpen(true)
+                    currentId.current = table.id
+                  }}
+                >
                   <XCircle className="hover:text-amber-400" size={23} />
                 </button>
-                <DialogConfirm
-                  isOpen={isDialogOpen}
-                  onClose={() => setIsDialogOpen(false)}
-                  onOpenChange={setIsDialogOpen}
-                  description="Você está prestes a deletar de uma vez por todas uma mesa. Agendamentos realizados nela serão perdidos."
-                  onButtonResponse={(isOk) => {
-                    if (isOk) {
-                      handleRemoveTable(table.id)
-                    }
-                  }}
-                />
               </div>
             </IntervalItem>
           ))}
       </div>
+      <DialogConfirm
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onOpenChange={setIsDialogOpen}
+        description="Você está prestes a deletar de uma vez por todas uma mesa. Agendamentos realizados nela serão perdidos."
+        onButtonResponse={(isOk) => {
+          if (isOk) {
+            handleRemoveTable(currentId.current)
+          }
+        }}
+      />
       <div className="pt-4">
         <h2 className="my-2 font-bold lg:mb-5 text-lg">Adicionar Mesa</h2>
         <form

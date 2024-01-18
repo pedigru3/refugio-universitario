@@ -47,14 +47,16 @@ export function TableButton({
     <button
       disabled={!isAvailable}
       className={` w-full rounded-md py-1 
-      disabled:cursor-default disabled:opacity-40
+      disabled:cursor-default disabled:opacity-40 h-12
       ${isChecked ? 'bg-blue-700' : 'bg-gray-600'}`}
       onClick={handleSelectPlace}
     >
       <p>{tableName}</p>
-      <p>
+      {/* 
+       <p>
         {placeState.markedPlaces}/{chairCount}
       </p>
+      */}
     </button>
   )
 }

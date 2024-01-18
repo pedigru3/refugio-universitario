@@ -27,7 +27,7 @@ export function TablePickerComponent({
   return (
     <div className="bg-zinc-800 border-t border-zinc-400 rounded-md rounded-t-none box-border max-w-[540px] lg:max-w-[800px]">
       <div className="mx-5 pt-5 pb-5">
-        Reserve seu lugar das{' '}
+        Reserve sua mesa das{' '}
         <span className="font-bold">{currentHour} horas:</span>
         <div className="flex gap-2 mt-2 mb-2">
           {availabilityTables.map((table) => {

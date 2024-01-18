@@ -2,7 +2,6 @@ import Image from 'next/image'
 import { Container } from '@/components/container'
 import { Header } from '@/components/header'
 import Link from 'next/link'
-
 import { BulletIcon } from '@/components/bullet-icon'
 import { Title } from '@/components/title'
 

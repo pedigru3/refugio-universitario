@@ -40,10 +40,16 @@ export default function Schedules() {
           Agendamentos
         </Title>
         <div>
+          {schedules.length === 0 && (
+            <p className="mt-5">
+              Ainda não temos agendamentos... Tudo tranquilo por aqui.
+            </p>
+          )}
           {schedules.map((item) => {
             return (
               <div key={item.date}>
                 <p>{item.date}</p>
+
                 {item.schedules.map((schedule) => {
                   return (
                     <div key={schedule.user} className="">
