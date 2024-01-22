@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!hourParam) {
-      return Response.json({ error: 'Hour not provided.' }, { status: 400 })
+      return Response.json(
+        { error: 'Start time not provided.' },
+        { status: 400 },
+      )
     }
 
     // Added 3 hours cause the American/Sao_Paulo Timezone
