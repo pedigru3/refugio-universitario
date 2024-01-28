@@ -1,5 +1,5 @@
 import { TimePickerItem } from '@/components/time-picker-item'
-import { Availability } from '../page'
+import { Availability } from '@/hooks/useSchedule'
 
 type TimePickerProps = {
   weekDay: string | null

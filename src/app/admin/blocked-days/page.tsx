@@ -13,11 +13,7 @@ const dateSchema = z.object({
 type DateFormInput = z.input<typeof dateSchema>
 
 export default function BlockedDays() {
-  const {
-    handleSubmit,
-    register,
-    formState: { isSubmitting, errors },
-  } = useForm<DateFormInput>({
+  const { handleSubmit, register } = useForm<DateFormInput>({
     resolver: zodResolver(dateSchema),
   })
 
