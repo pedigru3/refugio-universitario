@@ -1,7 +1,6 @@
 'use client'
 
 import { Container } from '@/components/container'
-import { Header } from '@/components/header'
 import Image from 'next/image'
 import { signOut, useSession } from 'next-auth/react'
 import { MyAppointments } from './my-appointments'

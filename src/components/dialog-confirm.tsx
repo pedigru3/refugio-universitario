@@ -1,6 +1,5 @@
 'use client'
 
-import { X } from '@phosphor-icons/react'
 import * as Dialog from '@radix-ui/react-alert-dialog'
 
 export function DialogConfirm({

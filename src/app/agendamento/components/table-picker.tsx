@@ -1,6 +1,6 @@
 import { Button } from '@/components/button'
 import { TableButton } from '@/components/table-button'
-import { AvailabilityTables } from '../page'
+import { AvailabilityTables } from '@/hooks/useSchedule'
 import dayjs from 'dayjs'
 
 interface TablePickerProps {
