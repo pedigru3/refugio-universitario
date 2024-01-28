@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 interface Schedule {
   user: string
   name: string
+  table: string
   hours: string[]
 }
 
@@ -47,26 +48,41 @@ export default function Schedules() {
           )}
           {schedules.map((item) => {
             return (
-              <div key={item.date}>
-                <p>{item.date}</p>
-
-                {item.schedules.map((schedule) => {
-                  return (
-                    <div key={schedule.user} className="">
-                      <p>{schedule.name}</p>
-                      <div className="flex gap-2">
-                        {schedule.hours.map((hour) => {
-                          return (
-                            <div className="bg-orange-400 p-2" key={hour}>
-                              {hour}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <table
+                key={item.date}
+                className="mt-5 w-full text-left max-w-md border-separate border-spacing-y-1"
+              >
+                <thead>
+                  <th className="bg-orange-400  p-2 text-lg">{item.date}</th>
+                </thead>
+                <tbody className="">
+                  {item.schedules.map((schedule) => {
+                    return (
+                      <tr
+                        key={schedule.user}
+                        className="bg-white opacity-80 shadow-sm text-blue-800 p-2 "
+                      >
+                        <p className="px-2 pt-2 font-bold">
+                          {schedule.name} - {schedule.table}
+                        </p>
+                        <p className="px-2"></p>
+                        <div className="flex gap-2">
+                          <p className="px-2 pt-1">
+                            <b>Horário:</b>
+                            {schedule.hours.map((hour) => {
+                              return (
+                                <span className="p-2" key={hour}>
+                                  {hour}
+                                </span>
+                              )
+                            })}
+                          </p>
+                        </div>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             )
           })}
         </div>

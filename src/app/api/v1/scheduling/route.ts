@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 type GroupedScheduling = {
   date: string
-  schedules: { user: string; name: string; hours: string[] }[]
+  schedules: { user: string; name: string; table: string; hours: string[] }[]
 }[]
 
 export async function GET() {
@@ -28,6 +28,11 @@ export async function GET() {
           name: true,
         },
       },
+      table: {
+        select: {
+          table_name: true,
+        },
+      },
       date: true,
     },
   })
@@ -46,6 +51,7 @@ export async function GET() {
           {
             user: user.username,
             name: user.name,
+            table: entry.table.table_name,
             hours: [hour],
           },
         ],
@@ -61,6 +67,7 @@ export async function GET() {
         existingDate?.schedules.push({
           user: user.username,
           name: user.name,
+          table: entry.table.table_name,
           hours: [hour],
         })
       }
