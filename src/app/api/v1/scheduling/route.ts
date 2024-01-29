@@ -2,6 +2,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/options'
 import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
+import dayjsUtc from 'dayjs/plugin/utc'
+import dayjsTimeZone from 'dayjs/plugin/timezone'
+
+dayjs.extend(dayjsUtc)
+dayjs.extend(dayjsTimeZone)
 
 type GroupedScheduling = {
   date: string
@@ -16,6 +21,9 @@ export async function GET() {
   }
 
   const scheduling = await prisma.scheduling.findMany({
+    orderBy: {
+      date: 'asc',
+    },
     where: {
       date: {
         gte: new Date().toISOString(),
@@ -41,7 +49,10 @@ export async function GET() {
 
   scheduling.forEach((entry) => {
     const date = dayjs(entry.date).format('DD/MM/YY')
-    const hour = dayjs(entry.date).format('HH')
+    const hour = dayjs
+      .utc(String(entry.date))
+      .tz('America/Sao_Paulo')
+      .format('HH')
     const user = entry.user
 
     if (!groupedScheduling.find((item) => item.date === date)) {
