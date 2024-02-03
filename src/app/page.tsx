@@ -33,12 +33,14 @@ export default function Home() {
                 jornadas acadêmicas.
               </p>
               <div className="mt-8 py-2 md:py-4 md:px-4 text-black text-lg font-medium bg-yellow-400 rounded-3xl md:rounded-[2rem] inline-block">
-                <Link
+                <a
                   className="px-8 py-2 font-semibold text-md md:text-xl"
-                  href="/agendamento"
+                  target="_blank"
+                  href="https://refugiouniversitario.com.br/agendamento"
+                  rel="noopener noreferrer"
                 >
                   Inscreva-se grátis
-                </Link>
+                </a>
               </div>
             </div>
           </div>
