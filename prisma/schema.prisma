@@ -74,9 +74,14 @@ model Table {
 }
 
 model Scheduling {
-  id         String   @id @default(uuid())
-  date       DateTime
-  created_at DateTime @default(now())
+  id   String   @id @default(uuid())
+  date DateTime
+
+  created_at DateTime  @default(now())
+  check_in   DateTime?
+  check_out  DateTime?
+
+  spent_time_in_minutes Int @default(60)
 
   table Table @relation(fields: [table_id], references: [id])
   user  User  @relation(fields: [user_id], references: [id])
