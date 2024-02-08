@@ -72,11 +72,16 @@ export async function POST(request: Request, { params }: RouteParams) {
   const BorySchema = z.object({
     date: z.string(),
     table_id: z.string(),
+    spent_time_in_minutes: z.number().optional(),
   })
 
   try {
     const bory = await request.json()
-    const { date, table_id: tableId } = BorySchema.parse(bory)
+    const {
+      date,
+      table_id: tableId,
+      spent_time_in_minutes: spentTimeInMinutes,
+    } = BorySchema.parse(bory)
 
     const schedulingDate = dayjs(date)
 
@@ -105,6 +110,78 @@ export async function POST(request: Request, { params }: RouteParams) {
         table: true,
       },
     })
+
+    // Criação das próximas horas
+
+    // 1. Descobrir quantas horas restam até o fim
+
+    const availableSchedule = await prisma.availableSchedule.findFirst({})
+
+    if (!availableSchedule) {
+      return Response.json(
+        { error: 'nenhum horário disponível' },
+        { status: 400 },
+      )
+    }
+
+    const timeStartInMinutes = scheduling.date.getHours() * 60
+    let timeEndInMinutes = availableSchedule.time_end_in_minutes
+
+    // Descobrir quantas horas restam até o proximo horario ocupado
+
+    const nextAppointment = await prisma.scheduling.findFirst({
+      where: {
+        date: {
+          gt: scheduling.date,
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    })
+
+    if (nextAppointment) {
+      console.log('hora do nextAppoitnment: ', nextAppointment.date.getHours())
+      timeEndInMinutes = nextAppointment.date.getHours() * 60
+    }
+
+    // fazer um agendamento para cada próxima hora
+
+    const nextSchedules: {
+      date: string
+      user_id: string
+      table_id: string
+    }[] = []
+
+    // verificar se horário do usuário é valido
+
+    if (spentTimeInMinutes) {
+      const timeEndInMinutesSetByUser = timeStartInMinutes + spentTimeInMinutes
+
+      if (timeEndInMinutesSetByUser <= timeEndInMinutes) {
+        timeEndInMinutes = timeEndInMinutesSetByUser
+      }
+    }
+
+    const spendTimeInHours = (timeEndInMinutes - timeStartInMinutes) / 60
+
+    console.log('spendTimeInHours: ', spendTimeInHours)
+
+    for (let i = 0; i < spendTimeInHours - 1; i++) {
+      nextSchedules.push({
+        date: dayjs(date)
+          .add(i + 1, 'hour')
+          .toISOString(),
+        table_id: scheduling.table_id,
+        user_id: scheduling.user_id,
+      })
+    }
+
+    await prisma.scheduling.createMany({
+      data: nextSchedules,
+    })
+
+    // Fim da criação das proximas horas
 
     const calendar = google.calendar({
       version: 'v3',
