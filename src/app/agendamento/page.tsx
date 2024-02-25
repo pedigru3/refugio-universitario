@@ -1,21 +1,30 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
 import { Loading } from '@/components/loading'
+import dayjs from 'dayjs'
+import { useSession } from 'next-auth/react'
+import { useRef, useState } from 'react'
+import useSWR from 'swr'
+import { useRouter } from 'next/navigation'
 import { Title } from '@/components/title'
-import { DialogComponent } from '@/components/dialog'
-
 import { TimePickerComponent } from './components/timer-picker'
 import { TablePickerComponent } from './components/table-picker'
+import { DialogComponent } from '@/components/dialog'
 
-import { useSchedule } from '@/hooks/useSchedule'
+export interface Availability {
+  possibleTimes: number[]
+  availableTimes: number[]
+}
 
-import dayjs from 'dayjs'
+export interface AvailabilityTables {
+  table_id: string
+  table_name: string
+  isAvailable: boolean
+  empty_chairs: number
+  chair_count: number
+}
 
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
@@ -24,24 +33,44 @@ export default function Agendamento() {
 
   const router = useRouter()
 
-  const {
-    availability,
-    availabilityTables,
-    selectedDate,
-    weekDay,
-    hour,
-    tableId,
-    handleSelectTable,
-    handleSelectTime,
-    handleSelectedDate,
-    isLoading,
-  } = useSchedule()
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [availabilityTables, setAvailabilityTables] = useState<
+    AvailabilityTables[] | null
+  >(null)
+
+  const [tableId, setTableId] = useState<string>('')
+  const hour = useRef<number>()
 
   const isDateSelected = !!selectedDate
 
+  const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
   const describeDate = selectedDate
     ? dayjs(selectedDate).format('DD[ de ]MMMM')
     : null
+
+  async function handleSelectedDate(date: Date) {
+    setSelectedDate(date)
+    setAvailabilityTables(null)
+    setTableId('')
+    hour.current = undefined
+  }
+
+  async function handleSelectTime(time: number) {
+    hour.current = time
+    const dateWithTime = dayjs(selectedDate).set('hour', time).startOf('hour')
+    const dateFormated = dateWithTime.format('YYYY-MM-DD')
+    const response = await fetch(
+      `/api/v1/availability/table?date=${dateFormated}&hour=${time}`,
+    )
+    const data = await response.json()
+    const availabilityTables: AvailabilityTables[] = data.availability
+    setAvailabilityTables(availabilityTables)
+    setTableId('')
+  }
+
+  function handleSelectTable(isTableSelected: boolean, tableId: string) {
+    isTableSelected ? setTableId(tableId) : setTableId('')
+  }
 
   async function handleSendingForm() {
     setIsSending(true)
@@ -75,6 +104,21 @@ export default function Agendamento() {
 
     setIsSending(false)
   }
+
+  const selectedDateWithoutTime = selectedDate
+    ? dayjs(selectedDate).format('YYYY-MM-DD')
+    : null
+
+  const { data: availability, isLoading } = useSWR<Availability>(
+    selectedDate ? ['availability', selectedDateWithoutTime] : null,
+    async () => {
+      const response = await fetch(
+        `/api/v1/availability?date=${selectedDateWithoutTime}`,
+      )
+      const json = await response.json()
+      return json
+    },
+  )
 
   if (status === 'loading') {
     return <Loading />
