@@ -23,19 +23,15 @@ export function TimePickerComponent({
   return (
     <div
       id="TimePicker"
-      className="lg:absolute lg:right-0 lg:top-0 lg:bottom-0 text-white border-t lg:border-l border-solid
-   border-gray-600 pt-6 px-6 lg:overflow-y-scroll lg:w-[280px]"
+      className="lg:absolute lg:right-0 lg:top-0 lg:bottom-0
+       text-white lg:border-l border-solid
+   border-gray-600 pt-2 px-2 lg:overflow-y-scroll lg:w-[280px] w-full"
     >
-      <div id="TimePickerHeader">
-        {weekDay} <span className="text-gray-400"> {describeDate} </span>
+      <div id="TimePickerHeader" className="text-lg">
+        {describeDate}
       </div>
 
-      <div
-        id="TimePickerList"
-        className="mt-3 grid grid-cols-2 lg:grid-cols-1 gap-2
-    last:mb-6
-    "
-      >
+      <div id="TimePickerList" className=" grid grid-cols-3 gap-2 pt-4">
         {availability?.possibleTimes.map((time) => {
           return (
             <TimePickerItem

@@ -22,7 +22,7 @@ export function TimePickerItem({
       className={`
   border-none py-2 cursor-pointer
    text-gray-100 rounded-md text-sm disabled:bg-none disabled:cursor-default
-   disabled:opacity-40  focus:shadow-sm 
+   disabled:opacity-40 focus:shadow-sm h-10
    ${
      isChecked
        ? 'bg-blue-700  hover:enabled:bg-blue-500'

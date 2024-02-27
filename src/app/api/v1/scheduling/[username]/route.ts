@@ -3,8 +3,11 @@ import { getGoogleOAuthToken } from '@/lib/google'
 import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
 import { google } from 'googleapis'
+import dayjsUtc from 'dayjs/plugin/utc'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
+
+dayjs.extend(dayjsUtc)
 
 type RouteParams = {
   params: { username: string }
@@ -115,7 +118,11 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // 1. Descobrir quantas horas restam até o fim
 
-    const availableSchedule = await prisma.availableSchedule.findFirst({})
+    const availableSchedule = await prisma.availableSchedule.findFirst({
+      where: {
+        week_day: dayjs(date).get('day'),
+      },
+    })
 
     if (!availableSchedule) {
       return Response.json(
@@ -133,6 +140,16 @@ export async function POST(request: Request, { params }: RouteParams) {
       where: {
         date: {
           gt: scheduling.date,
+        },
+        AND: {
+          date: {
+            lt: dayjs
+              .utc(scheduling.date)
+              .set('hour', 23)
+              .set('minute', 59)
+              .tz('America/Sao_Paulo')
+              .toISOString(),
+          },
         },
       },
       orderBy: {

@@ -27,6 +27,7 @@ export function useSchedule() {
     AvailabilityTables[] | null
   >(null)
 
+  // ver como receberá esse availabilityTime
   const [tableId, setTableId] = useState<string>('')
 
   const selectedDateWithoutTime = selectedDate
@@ -43,6 +44,8 @@ export function useSchedule() {
       return json
     },
   )
+
+  const availabilityTimes = availability?.availableTimes
 
   async function handleSelectedDate(date: Date) {
     setSelectedDate(date)
