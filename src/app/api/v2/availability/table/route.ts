@@ -41,12 +41,56 @@ export async function GET(request: NextRequest) {
     },
     select: {
       date: true,
+      table: {
+        select: {
+          chair_count: true,
+        },
+      },
     },
   })
 
-  const busyTimes = appointments.map((h) =>
-    dayjs.utc(h.date).tz('America/Sao_Paulo').get('hour'),
-  )
+  interface Appoitment {
+    date: Date
+    table: {
+      chair_count: number
+    }
+  }
+
+  interface AppoitmentResponse {
+    date: string
+    count: number
+    max: number
+  }
+
+  function groupByDate(objects: Appoitment[]): AppoitmentResponse[] {
+    const groupedObjects: {
+      [key: string]: { count: number; max: number }
+    } = {}
+
+    objects.forEach((obj) => {
+      const dateString = obj.date.toISOString() // Obter a data como uma string ISO completa
+      if (!groupedObjects[dateString]) {
+        groupedObjects[dateString] = { count: 0, max: obj.table.chair_count }
+      }
+      groupedObjects[dateString].count++
+      groupedObjects[dateString].max = obj.table.chair_count
+    })
+
+    return Object.keys(groupedObjects).map((key) => ({
+      date: key,
+      count: groupedObjects[key].count,
+      max: groupedObjects[key].max,
+    }))
+  }
+
+  const newAppointments = groupByDate(appointments)
+
+  const busyTimes: number[] = newAppointments.reduce((acc: number[], h) => {
+    if (h.count >= h.max) {
+      acc.push(dayjs.utc(h.date).tz('America/Sao_Paulo').get('hour'))
+    }
+    return acc
+  }, [])
 
   const availableSchedule = await prisma.availableSchedule.findFirst({
     where: {
