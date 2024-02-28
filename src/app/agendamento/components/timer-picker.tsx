@@ -6,7 +6,7 @@ type TimePickerProps = {
   describeDate: string | null
   isLoading: boolean
   availabilityTimes: Availability | undefined
-  currentHour: number | undefined
+  currentHour: number | null
   handleSelectTime: (value: number) => void
 }
 

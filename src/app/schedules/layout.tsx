@@ -1,6 +1,7 @@
 'use client'
 
 import { Header } from '@/components/header'
+import { ScheduleContextProvider } from '@/context/schedule-provider'
 
 export default function SignUpLayout({
   children,
@@ -12,7 +13,9 @@ export default function SignUpLayout({
       <div className="shadow-lg">
         <Header />
       </div>
-      <div className=" w-full min-h-screen py-5">{children}</div>
+      <div className=" w-full min-h-screen py-5">
+        <ScheduleContextProvider>{children}</ScheduleContextProvider>
+      </div>
     </div>
   )
 }

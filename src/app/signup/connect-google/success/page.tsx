@@ -33,7 +33,7 @@ export default function SuccessSignUp() {
           isLoading={isLoading}
           onClick={() => {
             setIsLoading(true)
-            router.push('/agendamento')
+            router.push('/schedules')
           }}
         >
           Marcar horário

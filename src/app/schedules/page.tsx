@@ -1,119 +1,37 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
-
+import { useContext, useState } from 'react'
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
 import { Loading } from '@/components/loading'
 import { Title } from '@/components/title'
-
-import { Availability } from '@/hooks/useSchedule'
-
 import dayjs from 'dayjs'
-import { TimePickerComponent } from '../agendamento/components/timer-picker'
-import { TableButton } from '@/components/table-button'
-import useSWR from 'swr'
 import { Button } from '@/components/button'
 import { useRouter } from 'next/navigation'
 import { DialogComponent } from '@/components/dialog'
-
-interface AvailabilityTable {
-  table_id: string
-  table_name: string
-  is_available: boolean
-}
-
-type AvailabilityTables = AvailabilityTable[]
+import { TablePickerComponent } from './components/table-picker'
+import { ScheduleContext } from '@/context/schedule-provider'
+import { TimeStartPicker } from './components/time-start-picker'
+import { TimeEndPicker } from './components/time-end-picker'
 
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-
-  const [availabilityTimes, setAilabilityTimes] = useState<Availability | null>(
-    null,
-  )
-
   const [isSeeding, setIsSeeding] = useState(false)
-
-  const [tableCheckedId, setTableChecked] = useState('')
-  const [startHour, selectStartHour] = useState<number | undefined>()
-  const [endHour, selectEndHour] = useState<number | undefined>()
-
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+
+  const {
+    selectedDate,
+    startHour,
+    endHour,
+    tableCheckedId,
+    changeSelectedDate,
+  } = useContext(ScheduleContext)
 
   const router = useRouter()
 
-  const selectedDateWithoutTime = selectedDate
-    ? dayjs(selectedDate).format('YYYY-MM-DD')
-    : null
-
-  const { data: availabilityTables, isLoading: loadingTables } =
-    useSWR<AvailabilityTables>(
-      selectedDate ? ['availabilityTables', selectedDateWithoutTime] : null,
-      async () => {
-        const response = await fetch(
-          `/api/v2/availability?date=${selectedDateWithoutTime}`,
-        )
-        const json = await response.json()
-        return json.availability
-      },
-    )
-
-  const { data: availabilityEndTimes, isLoading: loadingEndHours } =
-    useSWR<Availability>(
-      startHour
-        ? ['availabilityEndHours', [tableCheckedId, selectedDate, startHour]]
-        : null,
-      async () => {
-        const response = await fetch(
-          `/api/v2/availability/end-time?id=${tableCheckedId}&date=${dayjs(
-            selectedDate,
-          ).format('YYYY-MM-DD')}&hour=${startHour}`,
-        )
-        const json = await response.json()
-        return json
-      },
-    )
-
-  const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
-
   if (status === 'loading') {
     return <Loading />
-  }
-
-  function cleanAllData() {
-    selectEndHour(undefined)
-    selectStartHour(undefined)
-    setTableChecked('')
-    setAilabilityTimes(null)
-  }
-
-  async function handleSelectDate(date: Date) {
-    cleanAllData()
-    setSelectedDate(date)
-  }
-
-  async function handleSelectTable(tableId: string) {
-    cleanAllData()
-    setTableChecked(tableId)
-    await getAvailabilityTimesFromTable(tableId)
-  }
-
-  async function getAvailabilityTimesFromTable(id: string) {
-    if (selectedDate) {
-      const response = await fetch(
-        `/api/v2/availability/table?id=${id}&date=${dayjs(selectedDate).format(
-          'YYYY-MM-DD',
-        )}`,
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setAilabilityTimes(data)
-      } else {
-        console.error('Erro ao fazer a requisição:', response.statusText)
-      }
-    }
   }
 
   async function handleSendingForm() {
@@ -159,69 +77,12 @@ export default function Agendamento() {
         >
           <Calendar
             selectDate={selectedDate}
-            onDateSelected={handleSelectDate}
+            onDateSelected={changeSelectedDate}
           />
         </div>
-        {availabilityTables && (
-          <div className="bg-zinc-800 mt-1 rounded-md p-4">
-            <p className="text-lg text-bold">
-              Escolha uma mesa para o dia {selectedDate?.getDate()}:
-            </p>
-            <div className="flex gap-3 mt-2">
-              {loadingTables ? (
-                <p>loading</p>
-              ) : (
-                availabilityTables.map((table) => {
-                  return (
-                    <TableButton
-                      key={table.table_id}
-                      chairCount={0}
-                      emptyChairs={0}
-                      isAvailable={table.is_available}
-                      isChecked={table.table_id === tableCheckedId}
-                      tableName={table.table_name}
-                      onSelectedTable={() => {
-                        handleSelectTable(table.table_id)
-                      }}
-                    />
-                  )
-                })
-              )}
-            </div>
-          </div>
-        )}
-        {availabilityTimes && (
-          <div className="bg-zinc-800 mt-1 rounded-md p-2 pb-5">
-            <div className="flex gap-3">
-              <TimePickerComponent
-                isLoading={false}
-                availabilityTimes={availabilityTimes}
-                currentHour={startHour}
-                describeDate={`Horário de chegada`}
-                handleSelectTime={async (hour) => {
-                  selectStartHour(hour)
-                }}
-                weekDay={weekDay}
-              />
-            </div>
-          </div>
-        )}
-        {availabilityEndTimes && (
-          <div className="bg-zinc-800 mt-1 rounded-md p-2 pb-5">
-            <div className="flex gap-3">
-              <TimePickerComponent
-                isLoading={false}
-                availabilityTimes={availabilityEndTimes}
-                currentHour={endHour}
-                describeDate={`Horário de saída`}
-                handleSelectTime={(hour) => {
-                  selectEndHour(hour)
-                }}
-                weekDay={weekDay}
-              />
-            </div>
-          </div>
-        )}
+        <TablePickerComponent />
+        <TimeStartPicker />
+        <TimeEndPicker />
         {endHour && (
           <div className="bg-zinc-800 mt-1 rounded-md p-4 pb-5">
             <div className="items-center self-center">
