@@ -22,16 +22,11 @@ export async function GET(request: NextRequest) {
     by: ['table_id'],
     where: {
       date: {
-        gte: dayjs.utc(dateParams).tz('America/Sao_Paulo').toISOString(),
+        gte: dayjs(dateParams).startOf('date').toISOString(),
       },
       AND: {
         date: {
-          lte: dayjs
-            .utc(dateParams)
-            .set('hour', 23)
-            .set('minute', 59)
-            .tz('America/Sao_Paulo')
-            .toISOString(),
+          lte: dayjs(dateParams).endOf('date').toISOString(),
         },
       },
     },
