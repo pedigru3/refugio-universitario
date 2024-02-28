@@ -31,6 +31,9 @@ export async function GET(request: Request, { params }: RouteParams) {
   const appointments = await prisma.scheduling.findMany({
     where: {
       user_id: userExists.id,
+      date: {
+        gte: new Date().toISOString(),
+      },
     },
     select: {
       id: true,
@@ -157,8 +160,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           date: {
             lt: dayjs
               .utc(scheduling.date)
-              .set('hour', 23)
-              .set('minute', 59)
+              .endOf('date')
               .tz('America/Sao_Paulo')
               .toISOString(),
           },
@@ -170,7 +172,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
 
     if (nextAppointment) {
-      console.log('hora do nextAppoitnment: ', nextAppointment.date.getHours())
+      // console.log('hora do nextAppoitnment: ', nextAppointment.date.getHours())
       timeEndInMinutes = nextAppointment.date.getHours() * 60
     }
 
@@ -190,6 +192,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       if (timeEndInMinutesSetByUser <= timeEndInMinutes) {
         timeEndInMinutes = timeEndInMinutesSetByUser
       }
+
+      console.log('timeEndInMinutesSetByUser: ', timeEndInMinutesSetByUser)
     }
 
     const spendTimeInHours = (timeEndInMinutes - timeStartInMinutes) / 60

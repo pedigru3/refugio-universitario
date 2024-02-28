@@ -11,10 +11,8 @@ dayjs.extend(dayjsTimeZone)
 
 // Define the handler for the GET request
 export async function GET(request: NextRequest) {
-  // Added 3 hours cause the American/Sao_Paulo Timezone
-  //  const referenceDate = dayjs
-  //  .utc(String(dateParam))
-  //  .set('hour', Number(hourParam) + 3)
+  // IF YOU WANT ADD MORE TIME PARA AGENDAMENTO COM ANTECEDENCIA
+  const hoursInAdvance = 1
 
   const searchParams = request.nextUrl.searchParams
 
@@ -33,16 +31,11 @@ export async function GET(request: NextRequest) {
     where: {
       table_id: tableId,
       date: {
-        gte: dayjs.utc(dateParams).tz('America/Sao_Paulo').toISOString(),
+        gte: dayjs(dateParams).startOf('date').toISOString(),
       },
       AND: {
         date: {
-          lte: dayjs
-            .utc(dateParams)
-            .set('hour', 23)
-            .set('minute', 59)
-            .tz('America/Sao_Paulo')
-            .toISOString(),
+          lte: dayjs(dateParams).endOf('date').toISOString(),
         },
       },
     },
@@ -51,7 +44,9 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  const busyTimes = appointments.map((h) => dayjs(h.date).get('hour'))
+  const busyTimes = appointments.map((h) =>
+    dayjs.utc(h.date).tz('America/Sao_Paulo').get('hour'),
+  )
 
   const availableSchedule = await prisma.availableSchedule.findFirst({
     where: {
@@ -71,6 +66,27 @@ export async function GET(request: NextRequest) {
   let startHour = availableSchedule?.time_start_in_minutes / 60
   const endHour = availableSchedule?.time_end_in_minutes / 60
   const spentTime = endHour - startHour
+
+  const currentDate = dayjs.utc(new Date())
+
+  function isToday(): boolean {
+    return (
+      dayjs.utc(dateParams).tz('America/Sao_Paulo').toISOString() ===
+      currentDate.startOf('date').tz('America/Sao_Paulo').toISOString()
+    )
+  }
+
+  if (isToday()) {
+    const currentHour = currentDate.tz('America/Sao_Paulo').hour()
+    if (startHour < currentHour) {
+      const diffTime = currentHour - startHour + 1 + hoursInAdvance
+      let hourToAdd = startHour
+      for (let i = 0; i < diffTime; i++) {
+        busyTimes.push(hourToAdd)
+        hourToAdd += 1
+      }
+    }
+  }
 
   const possibleTimes = []
 
