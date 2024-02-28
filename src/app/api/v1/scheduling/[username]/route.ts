@@ -149,6 +149,9 @@ export async function POST(request: Request, { params }: RouteParams) {
     const timeStartInMinutes = scheduling.date.getHours() * 60
     let timeEndInMinutes = availableSchedule.time_end_in_minutes
 
+    console.log('timeStartInMinutes: ', timeStartInMinutes)
+    console.log('timeEndInMinutes: ', timeEndInMinutes)
+
     // Descobrir quantas horas restam até o proximo horario ocupado
 
     const nextAppointment = await prisma.scheduling.findFirst({
