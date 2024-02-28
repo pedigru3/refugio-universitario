@@ -23,9 +23,9 @@ export function TimePickerComponent({
   return (
     <div
       id="TimePicker"
-      className="lg:absolute lg:right-0 lg:top-0 lg:bottom-0
-       text-white lg:border-l border-solid
-   border-gray-600 pt-2 px-2 lg:overflow-y-scroll lg:w-[280px] w-full"
+      className="
+       text-white  border-solid
+   border-gray-600 pt-2 px-2  w-full"
     >
       <div id="TimePickerHeader" className="text-lg">
         {describeDate}

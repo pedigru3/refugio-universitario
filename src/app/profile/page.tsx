@@ -45,7 +45,7 @@ export default function Profile() {
         <p>{session?.user.education_level} </p>
         <p className="border-t mt-2 pt-2">{session?.user.course}</p>
       </div>
-      <div className="mt-10">
+      <div className="mt-10 pb-10">
         <h3 className="text-2xl font-bold mb-5">Minhas reservas</h3>
         <MyAppointments />
       </div>

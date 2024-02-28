@@ -6,6 +6,6 @@ export const menuList = [
   },
   {
     title: 'Agendamento',
-    link: '/agendamento',
+    link: '/schedules',
   },
 ]

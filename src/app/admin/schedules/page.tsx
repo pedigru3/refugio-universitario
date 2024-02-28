@@ -35,7 +35,7 @@ export default function Schedules() {
   }, [])
 
   return (
-    <div className="mt-10">
+    <div className="mt-10 pb-10">
       <Container>
         <Title type="h2" color="light">
           Agendamentos

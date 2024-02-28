@@ -35,7 +35,7 @@ export default function Home() {
               <div className="mt-8 py-2 md:py-4 md:px-4 text-black text-lg font-medium bg-yellow-400 rounded-3xl md:rounded-[2rem] inline-block">
                 <Link
                   className="px-8 py-2 font-semibold text-md md:text-xl"
-                  href="/agendamento"
+                  href="/schedules"
                 >
                   Inscreva-se grátis
                 </Link>

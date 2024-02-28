@@ -4,10 +4,12 @@ import { prisma } from '@/lib/prisma'
 import dayjs from 'dayjs'
 import { google } from 'googleapis'
 import dayjsUtc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 
 dayjs.extend(dayjsUtc)
+dayjs.extend(timezone)
 
 type RouteParams = {
   params: { username: string }
@@ -74,7 +76,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   const BorySchema = z.object({
     date: z.string(),
-    table_id: z.string(),
+    table_id: z.string().uuid(),
     spent_time_in_minutes: z.number().optional(),
   })
 
@@ -85,6 +87,16 @@ export async function POST(request: Request, { params }: RouteParams) {
       table_id: tableId,
       spent_time_in_minutes: spentTimeInMinutes,
     } = BorySchema.parse(bory)
+
+    const table = await prisma.table.findUnique({
+      where: {
+        id: tableId,
+      },
+    })
+
+    if (!table) {
+      return Response.json({ error: 'invalid Table' }, { status: 400 })
+    }
 
     const schedulingDate = dayjs(date)
 
@@ -214,7 +226,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           dateTime: schedulingDate.format(),
         },
         end: {
-          dateTime: schedulingDate.add(1, 'hour').format(),
+          dateTime: schedulingDate.add(spendTimeInHours, 'hour').format(),
         },
         attendees: [{ email: userExists.email, displayName: userExists.name }],
       },
@@ -222,6 +234,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({}, { status: 201 })
   } catch (error) {
+    console.log(error)
     return Response.json(
       { error: `Something unexpected happened` },
       { status: 500 },
