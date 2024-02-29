@@ -120,8 +120,15 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  console.log('date params: ')
+  console.log(dayjs.utc(dateParams).tz('America/Sao_Paulo').toISOString())
+  console.log('currentDate: ')
+  console.log(currentDate.startOf('date').tz('America/Sao_Paulo').toISOString())
+  console.log('isToday: ', isToday())
+
   if (isToday()) {
     const currentHour = currentDate.tz('America/Sao_Paulo').hour()
+    console.log('currentHOur: ', currentHour)
     if (startHour < currentHour) {
       const diffTime = currentHour - startHour + 1 + hoursInAdvance
       let hourToAdd = startHour
