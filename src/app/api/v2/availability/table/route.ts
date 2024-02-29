@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
   if (isToday()) {
     const currentHour = currentDate.tz('America/Sao_Paulo').hour()
     console.log('currentHOur: ', currentHour)
-    if (startHour < currentHour) {
+    if (startHour <= currentHour) {
       const diffTime = currentHour - startHour + 1 + hoursInAdvance
       let hourToAdd = startHour
       for (let i = 0; i < diffTime; i++) {
