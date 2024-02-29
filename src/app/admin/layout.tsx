@@ -17,7 +17,7 @@ export default async function LayouyAdmin({
 
   if (isAuth) {
     return (
-      <div className="flex h-screen">
+      <div className="flex min-h-screen">
         <div className="min-w-[250px] bg-purple-900 shadow-sm">
           <MenuAdmin />
         </div>

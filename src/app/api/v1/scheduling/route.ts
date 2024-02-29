@@ -10,7 +10,13 @@ dayjs.extend(dayjsTimeZone)
 
 type GroupedScheduling = {
   date: string
-  schedules: { user: string; name: string; table: string; hours: string[] }[]
+  schedules: {
+    user: string
+    name: string
+    course: string
+    table: string
+    hours: string[]
+  }[]
 }[]
 
 export async function GET() {
@@ -34,6 +40,7 @@ export async function GET() {
         select: {
           username: true,
           name: true,
+          course: true,
         },
       },
       table: {
@@ -62,6 +69,7 @@ export async function GET() {
           {
             user: user.username,
             name: user.name,
+            course: entry.user.course,
             table: entry.table.table_name,
             hours: [hour],
           },
@@ -78,6 +86,7 @@ export async function GET() {
         existingDate?.schedules.push({
           user: user.username,
           name: user.name,
+          course: entry.user.course,
           table: entry.table.table_name,
           hours: [hour],
         })

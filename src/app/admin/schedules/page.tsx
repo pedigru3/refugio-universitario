@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 interface Schedule {
   user: string
   name: string
+  course: string
   table: string
   hours: string[]
 }
@@ -65,7 +66,12 @@ export default function Schedules() {
                         <p className="px-2 pt-2 font-bold">
                           {schedule.name} - {schedule.table}
                         </p>
-                        <p className="px-2"></p>
+                        <div className="px-2">
+                          <p>
+                            <b>Curso: </b>
+                            {schedule.course}
+                          </p>
+                        </div>
                         <div className="flex gap-2">
                           <p className="px-2 pt-1">
                             <b>Horário:</b>

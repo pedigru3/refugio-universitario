@@ -173,7 +173,6 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
 
     if (nextAppointment) {
-      // console.log('hora do nextAppoitnment: ', nextAppointment.date.getHours())
       timeEndInMinutes = nextAppointment.date.getHours() * 60
     }
 
@@ -193,8 +192,6 @@ export async function POST(request: Request, { params }: RouteParams) {
       if (timeEndInMinutesSetByUser <= timeEndInMinutes) {
         timeEndInMinutes = timeEndInMinutesSetByUser
       }
-
-      console.log('timeEndInMinutesSetByUser: ', timeEndInMinutesSetByUser)
     }
 
     const spendTimeInHours = (timeEndInMinutes - timeStartInMinutes) / 60
