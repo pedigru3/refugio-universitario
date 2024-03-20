@@ -76,8 +76,8 @@ export async function GET() {
             course: entry.user.course,
             table: entry.table.table_name,
             hours: [hour],
-            check_in: entry.check_in?.toISOString(),
-            chair_count: entry.check_in?.toISOString(),
+            // check_in: entry.check_in?.toISOString(),
+            // chair_count: entry.check_in?.toISOString(),
           },
         ],
       })
