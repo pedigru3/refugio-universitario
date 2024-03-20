@@ -6,7 +6,6 @@ import Image from 'next/image'
 
 export default function SignUp() {
   async function handleSignIn() {
-    console.log('login google')
     try {
       await signIn('google')
     } catch (error) {

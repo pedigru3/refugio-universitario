@@ -49,8 +49,6 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  console.log(nextAppointment)
-
   const availableSchedule = await prisma.availableSchedule.findFirst({
     where: {
       week_day: dayjs(dateParams).get('day'),

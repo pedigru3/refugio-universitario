@@ -43,6 +43,10 @@ export function TablePickerComponent() {
         <p className="text-lg text-bold">
           Escolha uma mesa para o dia {selectedDate?.getDate()}:
         </p>
+        <p className="pt-2 pb-1">
+          <span className="font-bold text-red-400">Atenção: </span>Você só está
+          garantindo o seu lugar. Cada um deve fazer o seu próprio agendamento.
+        </p>
         <div className="flex gap-3 mt-2">
           {loadingTables ? (
             <p>loading</p>
