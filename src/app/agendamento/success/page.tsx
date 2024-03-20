@@ -28,9 +28,14 @@ export default function Success() {
             height={600}
           />
         </div>
-        <p className="leading-6 text-center text-lg">
-          Seu agendamento foi realizado com sucesso! Conte com a gente!
+        <p className="leading-6 text-center text-lg pb-3">
+          Seu agendamento foi realizado com sucesso!
         </p>
+        <p className="text-center">
+          <span className="text-red-400 font-bold">Atenção:</span> Caso não seja
+          possível o comparecimento,
+        </p>
+        <p className="text-center">cancele o agendamento no seu perfil.</p>
         <div className="mt-10 flex justify-center items-center">
           <Link
             className="w-full justify-center text-center text-lg p-2 rounded-lg bg-blue-900"
