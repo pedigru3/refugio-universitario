@@ -44,8 +44,9 @@ export function TablePickerComponent() {
           Escolha uma mesa para o dia {selectedDate?.getDate()}:
         </p>
         <p className="pt-2 pb-1">
-          <span className="font-bold text-red-400">Atenção: </span>Você só está
-          garantindo o seu lugar. Cada um deve fazer o seu próprio agendamento.
+          <span className="font-bold text-red-400">Atenção: </span>Ao agendar
+          uma mesa coletiva, você só está garantindo o seu lugar. Cada um deve
+          fazer o seu agendamento de forma individual.
         </p>
         <div className="flex gap-3 mt-2">
           {loadingTables ? (
