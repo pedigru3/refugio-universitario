@@ -12,7 +12,7 @@ dayjs.extend(dayjsTimeZone)
 // Define the handler for the GET request
 export async function GET(request: NextRequest) {
   // IF YOU WANT ADD MORE TIME PARA AGENDAMENTO COM ANTECEDENCIA
-  const hoursInAdvance = 1
+  const hoursInAdvance = 0
 
   const searchParams = request.nextUrl.searchParams
 
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
   if (isToday()) {
     const currentHour = currentDate.tz('America/Sao_Paulo').hour()
     if (startHour - 1 <= currentHour) {
-      const diffTime = currentHour - startHour + 1 + hoursInAdvance
+      const diffTime = currentHour - startHour + hoursInAdvance
       let hourToAdd = startHour
       for (let i = 0; i < diffTime; i++) {
         busyTimes.push(hourToAdd)
