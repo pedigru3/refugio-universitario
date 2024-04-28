@@ -25,6 +25,8 @@ const timeIntervalsFormSchema = z.object({
         enabled: z.boolean(),
         startTime: z.string(),
         endTime: z.string(),
+        startBlock: z.string(),
+        endBlock: z.string(),
       }),
     )
     .length(7)
@@ -38,6 +40,8 @@ const timeIntervalsFormSchema = z.object({
           weekDay: interval.weekDay,
           startTimeInMinutes: convertTimeStringToMinutes(interval.startTime),
           endTimeInMinutes: convertTimeStringToMinutes(interval.endTime),
+          startBlockInMinutes: convertTimeStringToMinutes(interval.startBlock),
+          endBlockInMinutes: convertTimeStringToMinutes(interval.endBlock),
         }
       })
     })
@@ -84,13 +88,62 @@ export function IntervalForm() {
     resolver: zodResolver(timeIntervalsFormSchema),
     defaultValues: {
       intervals: [
-        { weekDay: 0, enabled: false, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 1, enabled: true, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 2, enabled: true, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 3, enabled: true, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 4, enabled: true, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 5, enabled: true, startTime: '9:00', endTime: '17:00' },
-        { weekDay: 6, enabled: false, startTime: '9:00', endTime: '17:00' },
+        {
+          weekDay: 0,
+          enabled: false,
+          startTime: '10:00',
+          endTime: '21:00',
+          startBlock: '14:00',
+          endBlock: '17:00',
+        },
+        {
+          weekDay: 1,
+          enabled: true,
+          startTime: '10:00',
+          endTime: '21:00',
+          startBlock: '14:00',
+          endBlock: '17:00',
+        },
+        {
+          weekDay: 2,
+          enabled: true,
+          startTime: '10:00',
+          endTime: '21:00',
+          startBlock: '14:00',
+          endBlock: '17:00',
+        },
+        {
+          weekDay: 3,
+          enabled: true,
+          startTime: '10:00',
+          endTime: '17:00',
+          startBlock: '18:00',
+          endBlock: '18:00',
+        },
+        {
+          weekDay: 4,
+          enabled: true,
+          startTime: '10:00',
+          endTime: '17:00',
+          startBlock: '18:00',
+          endBlock: '18:00',
+        },
+        {
+          weekDay: 5,
+          enabled: false,
+          startTime: '10:00',
+          endTime: '21:00',
+          startBlock: '14:00',
+          endBlock: '17:00',
+        },
+        {
+          weekDay: 6,
+          enabled: false,
+          startTime: '10:00',
+          endTime: '21:00',
+          startBlock: '14:00',
+          endBlock: '17:00',
+        },
       ],
       startDay: dayjs(new Date()).format('YYYY-MM-DD'),
     },
@@ -109,6 +162,8 @@ export function IntervalForm() {
     const { intervals, lastDay, startDay } = data as TimeIntervalsFormOutput
 
     const body = JSON.stringify({ intervals, lastDay, startDay })
+
+    console.log(intervals)
 
     const response = await fetch('/api/v1/availability', {
       method: 'POST',
@@ -151,6 +206,16 @@ export function IntervalForm() {
                 <IntervalSet
                   disabled={intervals[index].enabled === false}
                   innerRef={register(`intervals.${index}.endTime`)}
+                />
+                <IntervalSet
+                  disabled={intervals[index].enabled === false}
+                  innerRef={register(`intervals.${index}.startBlock`)}
+                  background
+                />
+                <IntervalSet
+                  disabled={intervals[index].enabled === false}
+                  innerRef={register(`intervals.${index}.endBlock`)}
+                  background
                 />
               </IntervalInputs>
             </IntervalItem>

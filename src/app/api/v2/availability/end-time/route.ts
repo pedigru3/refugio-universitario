@@ -71,13 +71,28 @@ export async function GET(request: NextRequest) {
   }
 
   const spentTime = endHour - startHour
-  const availableTimes = []
+  let availableTimes = []
 
   let hour = startHour + 1
 
   for (let i = 0; i < spentTime; i++) {
     availableTimes.push(hour)
     hour += 1
+  }
+
+  let startBlock = availableSchedule?.start_block_in_minutes / 60
+  const endBlock = availableSchedule?.end_block_in_minutes / 60
+  const spentTimeBlock = endBlock - startBlock
+
+  const interval: number[] = []
+
+  for (let i = 0; i <= spentTimeBlock; i++) {
+    interval.push(startBlock)
+    startBlock += 1
+  }
+
+  if (startHour < interval[0]) {
+    availableTimes = availableTimes.filter((time) => time <= interval[0])
   }
 
   return Response.json({

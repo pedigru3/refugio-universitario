@@ -94,9 +94,11 @@ model Scheduling {
 }
 
 model AvailableSchedule {
-  week_day              Int @unique
-  time_start_in_minutes Int
-  time_end_in_minutes   Int
+  week_day               Int @unique
+  time_start_in_minutes  Int
+  time_end_in_minutes    Int
+  start_block_in_minutes Int @default(0)
+  end_block_in_minutes   Int @default(0)
 
   start_day DateTime?
   final_day DateTime?

@@ -5,14 +5,18 @@ import { ReactNode } from 'react'
 export function IntervalSet({
   disabled,
   innerRef,
+  background = false,
 }: {
   children?: ReactNode
   innerRef?: any
   disabled?: boolean
+  background?: boolean
 }) {
   return (
     <div
-      className={` bg-white text-black rounded-lg shadow-xl 
+      className={`${
+        background ? 'bg-red-300' : 'bg-white'
+      }  text-black rounded-lg shadow-xl 
                     py-1 px-2 ${disabled && 'opacity-50'}`}
     >
       <div className="flex">

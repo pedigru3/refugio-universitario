@@ -16,6 +16,8 @@ const timeIntervalSchema = z.object({
   weekDay: z.number(),
   startTimeInMinutes: z.number(),
   endTimeInMinutes: z.number(),
+  startBlockInMinutes: z.number(),
+  endBlockInMinutes: z.number(),
   finalDay: z.string().optional(),
 })
 
@@ -157,6 +159,8 @@ export async function POST(request: NextRequest) {
       return {
         time_start_in_minutes: interval.startTimeInMinutes,
         time_end_in_minutes: interval.endTimeInMinutes,
+        start_block_in_minutes: interval.startBlockInMinutes,
+        end_block_in_minutes: interval.endBlockInMinutes,
         week_day: interval.weekDay,
         start_day: new Date(startDay),
         final_day: new Date(lastDay),

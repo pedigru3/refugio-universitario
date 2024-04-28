@@ -143,8 +143,23 @@ export async function GET(request: NextRequest) {
     (hour) => !busyTimes.includes(hour),
   )
 
+  let startBlock = availableSchedule?.start_block_in_minutes / 60
+  const endBlock = availableSchedule?.end_block_in_minutes / 60
+  const spentTimeBlock = endBlock - startBlock
+
+  const interval: number[] = []
+
+  for (let i = 0; i <= spentTimeBlock; i++) {
+    interval.push(startBlock)
+    startBlock += 1
+  }
+
+  const possibleTimesWithInterval = possibleTimes.filter(
+    (pt) => !interval.includes(pt),
+  )
+
   return Response.json({
-    possibleTimes,
+    possibleTimes: possibleTimesWithInterval,
     availableTimes: availabilityTimes,
   })
   // Return the availability information as a JSON response
