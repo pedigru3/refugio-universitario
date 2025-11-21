@@ -4,8 +4,4 @@ export const menuList = [
     link: '/',
     role: '',
   },
-  {
-    title: 'Agendamento',
-    link: '/schedules',
-  },
 ]

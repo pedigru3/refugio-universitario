@@ -1,11 +1,16 @@
 import Image from 'next/image'
+import { getServerSession } from 'next-auth'
 import { Container } from '@/components/container'
 import { Header } from '@/components/header'
 import Link from 'next/link'
 import { BulletIcon } from '@/components/bullet-icon'
 import { Title } from '@/components/title'
+import { StatusSection } from '@/components/status-section'
+import { authOptions } from './api/auth/[...nextauth]/options'
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions)
+
   return (
     <>
       <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end min-h-[650px] w-full">
@@ -32,17 +37,28 @@ export default function Home() {
                 Um ambiente onde universitários são acolhidos e apoiados em suas
                 jornadas acadêmicas.
               </p>
-              <div className="mt-8 py-2 md:py-4 md:px-4 text-black text-lg font-medium bg-yellow-400 rounded-3xl md:rounded-[2rem] inline-block">
-                <Link
-                  className="px-8 py-2 font-semibold text-md md:text-xl"
-                  href="/schedules"
-                >
-                  Inscreva-se grátis
-                </Link>
-              </div>
+              {!session && (
+                <div className="mt-8 inline-block rounded-3xl bg-yellow-400 py-2 text-lg font-medium text-black md:rounded-[2rem] md:py-4 md:px-4">
+                  <Link
+                    className="px-8 py-2 text-md font-semibold md:text-xl"
+                    href="/schedules"
+                  >
+                    Inscreva-se grátis
+                  </Link>
+                </div>
+              )}
+              {session && (
+                <div className="mt-8 inline-block rounded-3xl bg-yellow-400 py-2 text-lg font-medium text-black md:rounded-[2rem] md:py-4 md:px-4">
+                  <p className="px-8 py-1 text-md font-semibold md:text-xl">
+                    Seja bem-vindo, {session.user.name.split(' ')[0]}!
+                  </p>
+                </div>
+              )}
             </div>
           </div>
+          <StatusSection />
         </Container>
+        <div className="pb-10" />
       </div>
       <main className="bg-white">
         <Container>

@@ -9,7 +9,7 @@ declare module 'next-auth' {
     email: string
     course: string
     education_level: string
-    avatar_url: string
+    avatar_url: string | null
     role: string
   }
 

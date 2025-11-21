@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/prisma'
 import { PrismaAdapter } from '@/lib/auth/prisma-adapter'
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
@@ -32,15 +33,26 @@ export const authOptions: NextAuthOptions = {
           role: profile.role ?? 'user',
         }
       },
+      allowDangerousEmailAccountLinking: true,
     }),
     // ...add more providers here
   ],
   callbacks: {
-    async signIn({ account }) {
+    async signIn({ account, profile }) {
       if (
         !account?.scope?.includes('https://www.googleapis.com/auth/calendar')
       ) {
         return '/signup/connect-google/?error=permissions'
+      }
+
+      if (account?.provider === 'google' && profile?.email) {
+        const userExists = await prisma.user.findUnique({
+          where: { email: profile.email },
+        })
+
+        if (!userExists) {
+          return '/signup?error=unregistered'
+        }
       }
 
       return true

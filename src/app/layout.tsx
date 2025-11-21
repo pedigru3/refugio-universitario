@@ -13,6 +13,7 @@ import { inter, plusJakartaSans } from './fonts'
 export const metadata: Metadata = {
   title: 'Refúgio Universitário',
   description: 'Lugar de acolhimento e uma possiblidade de família',
+  metadataBase: new URL('https://refugiouniversitario.com.br'),
   openGraph: {
     url: 'https://refugiouniversitario.com.br',
     title: 'Refúgio Universitário',

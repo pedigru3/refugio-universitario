@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -109,4 +108,12 @@ model AvailableSchedule {
 model BlockedDates {
   id   String   @id @default(uuid())
   date DateTime
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+
+  @@map("system_configs")
 }

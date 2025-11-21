@@ -2,34 +2,40 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+type Option = {
+  value: string
+  label: string
+}
+
 type CustomSelectProps = {
-  handleOptionClick: (value: string) => void
-  textDefault: string
-  options: string[]
-  index?: number
+  options: Option[]
+  placeholder: string
+  value?: string
+  onChange?: (value: string) => void
+  error?: string
 }
 
 export function CustomSelect({
-  handleOptionClick,
   options,
-  textDefault,
-  index,
+  placeholder,
+  value,
+  onChange,
+  error,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [option, setOption] = useState('')
-
-  const zindex = `z-${index ?? 0}`
-
   const customSelectRef = useRef<HTMLDivElement>(null)
 
-  function handleCustomSelectClick() {
-    setIsOpen((value) => !value)
+  const selectedOption = options.find((option) => option.value === value)
+
+  function handleToggleOpen() {
+    setIsOpen((prev) => !prev)
   }
 
-  function handleClick(value: string) {
-    handleOptionClick(value)
-    setIsOpen((value) => !value)
-    setOption(value)
+  function handleOptionClick(optionValue: string) {
+    if (onChange) {
+      onChange(optionValue)
+    }
+    setIsOpen(false)
   }
 
   useEffect(() => {
@@ -41,41 +47,38 @@ export function CustomSelect({
         setIsOpen(false)
       }
     }
-
-    // Adicione o event listener quando o componente for montado
     document.addEventListener('mousedown', handleClickOutside)
-
-    // Remova o event listener quando o componente for desmontado
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
 
   return (
-    <div className=" w-full mt-4" ref={customSelectRef}>
+    <div className="w-full mt-4 relative" ref={customSelectRef}>
       <div
         className={`h-12 ${
-          option === '' ? 'text-zinc-400' : 'text-black'
-        } flex pl-5 items-center rounded-md w-full bg-white cursor-pointer`}
-        onClick={handleCustomSelectClick}
+          !selectedOption ? 'text-zinc-400' : 'text-black'
+        } flex pl-5 items-center rounded-md w-full bg-white cursor-pointer border ${
+          error ? 'border-red-500' : 'border-gray-300'
+        }`}
+        onClick={handleToggleOpen}
       >
-        {option === '' ? textDefault : option}
+        {selectedOption ? selectedOption.label : placeholder}
       </div>
       {isOpen && (
-        <ul
-          className={`absolute ${zindex} text-zinc-400 w-full overflow-auto h-52 bg-purple-500 flex flex-col items-center rounded-md`}
-        >
-          {options.map((level) => (
+        <ul className="absolute z-10 text-zinc-600 w-full overflow-auto max-h-52 bg-white border border-gray-300 rounded-md mt-1">
+          {options.map((option) => (
             <li
-              className={`bg-white py-3 items-center flex pl-5 border-b-2 w-full cursor-pointer`}
-              key={level}
-              onClick={() => handleClick(level)}
+              className="py-3 px-5 hover:bg-purple-100 cursor-pointer"
+              key={option.value}
+              onClick={() => handleOptionClick(option.value)}
             >
-              {level}
+              {option.label}
             </li>
           ))}
         </ul>
       )}
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   )
 }

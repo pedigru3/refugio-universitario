@@ -24,6 +24,9 @@ export function MenuAdmin() {
         <Link href={'/admin/tables'}>Gerenciar Mesas</Link>
       </li>
       <li>
+        <Link href={'/admin/users'}>Usuários</Link>
+      </li>
+      <li>
         <Link href={'/admin/blocked-days'}>Datas Bloqueadas</Link>
       </li>
     </ul>

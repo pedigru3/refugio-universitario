@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Adapter } from 'next-auth/adapters'
+import { Adapter, AdapterAccount, AdapterUser } from 'next-auth/adapters'
 import { prisma } from '../prisma'
 import { cookies } from 'next/headers'
 
 export function PrismaAdapter(): Adapter {
   return {
-    async createUser(user) {
+    async createUser(user: AdapterUser) {
       const cookieStore = cookies()
       const cookiesResponse = cookieStore.get('@refugiouniversitario:userId')
 
@@ -35,7 +35,7 @@ export function PrismaAdapter(): Adapter {
         username: prismaUser.username,
         email: prismaUser.email!,
         emailVerified: null,
-        avatar_url: prismaUser.avatar_url!,
+        avatar_url: prismaUser.avatar_url,
         course: prismaUser.course,
         education_level: prismaUser.education_level,
         role: prismaUser.role ?? 'user',
@@ -49,8 +49,8 @@ export function PrismaAdapter(): Adapter {
         return null
       }
 
-      if (!user.avatar_url || !user.email) {
-        throw new Error('Error user avatar_url or user email')
+      if (!user.email) {
+        return null
       }
 
       return {
@@ -73,8 +73,8 @@ export function PrismaAdapter(): Adapter {
         return null
       }
 
-      if (!user.avatar_url || !user.email) {
-        throw new Error('Error user avatar_url or user email')
+      if (!user.email) {
+        return null
       }
 
       return {
@@ -109,15 +109,15 @@ export function PrismaAdapter(): Adapter {
 
       const { user } = account
 
-      if (!user.avatar_url || !user.email) {
-        throw new Error('Error user avatar_url or user email')
+      if (!user.email) {
+        return null
       }
 
       return {
         id: user.id,
         name: user.name,
         username: user.username,
-        email: user.avatar_url,
+        email: user.email,
         emailVerified: null,
         avatar_url: user.avatar_url,
         course: user.course,
@@ -141,15 +141,11 @@ export function PrismaAdapter(): Adapter {
         },
       })
 
-      if (!prismaUser.avatar_url || !prismaUser.email) {
-        throw new Error('Error user avatar_url or user email')
-      }
-
       return {
         id: prismaUser.id,
         name: prismaUser.name,
         username: prismaUser.username,
-        email: prismaUser.email,
+        email: prismaUser.email!,
         emailVerified: null,
         avatar_url: prismaUser.avatar_url,
         course: prismaUser.course,
@@ -166,7 +162,7 @@ export function PrismaAdapter(): Adapter {
       })
     },
 
-    async linkAccount(account) {
+    async linkAccount(account: AdapterAccount) {
       const today = new Date()
       const expiresAt = account.expires_at ?? null
 
@@ -233,7 +229,7 @@ export function PrismaAdapter(): Adapter {
           username: user.username,
           email: user.email!,
           emailVerified: null,
-          avatar_url: user.avatar_url!,
+          avatar_url: user.avatar_url,
           course: user.course,
           education_level: user.education_level,
           role: user.role ?? 'user',

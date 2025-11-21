@@ -3,8 +3,13 @@
 import { SignUpForm } from '@/components/signup-form'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
+import { FormAnnotation } from '@/components/form-annotation'
 
 export default function SignUp() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
+
   async function handleSignIn() {
     try {
       await signIn('google')
@@ -36,6 +41,9 @@ export default function SignUp() {
           />
           <span className="text-sm font-bold">Sign in with Google</span>
         </button>
+        {error === 'unregistered' && (
+          <FormAnnotation annotation="E-mail não cadastrado. Por favor, crie sua conta primeiro." />
+        )}
       </div>
     </div>
   )
