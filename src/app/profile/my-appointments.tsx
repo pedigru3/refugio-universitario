@@ -3,9 +3,13 @@
 import useSWR, { useSWRConfig } from 'swr'
 import { useSession } from 'next-auth/react'
 import dayjs from 'dayjs'
+import 'dayjs/locale/pt-br'
+import { Calendar } from '@phosphor-icons/react'
 import { CloseButton } from './close-button'
 import { Loading } from '@/components/loading'
 import { Appointment } from '@/models/appointment'
+
+dayjs.locale('pt-br')
 
 type Appointments = Appointment[]
 
@@ -67,28 +71,35 @@ export function MyAppointments() {
 
   if (appointments.length === 0) {
     return (
-      <div className="mt-10">
-        <p>Você não tem nenhum agendamento ainda</p>
+      <div className="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
+        <p className="text-zinc-400">
+          Você não tem nenhum agendamento ainda
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="mt-10">
+    <div className="space-y-3">
       {appointments.map((appointment) => {
         const dateAppointment = dayjs(appointment.date)
         return (
           <div
-            className="w-full bg-white shadow-lg px-5 py-5 mb-3 rounded-md flex
-            justify-between items-center"
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur transition hover:border-white/20"
             key={appointment.date}
           >
-            <div>
-              <p className="text-black">
-                {dateAppointment.format('DD/MM/YYYY')} às{' '}
-                {dateAppointment.format('HH')} horas
-              </p>
-              <p className="text-black">{appointment.table.table_name}</p>
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg border border-purple-400/30 bg-purple-500/10 p-3">
+                <Calendar size={20} weight="bold" className="text-purple-200" />
+              </div>
+              <div>
+                <p className="font-semibold text-white">
+                  {dateAppointment.format('DD [de] MMMM [de] YYYY')}
+                </p>
+                <p className="text-sm text-zinc-400">
+                  {dateAppointment.format('HH:mm')} • {appointment.table.table_name}
+                </p>
+              </div>
             </div>
             <CloseButton
               onClick={(value) => handleCloseButton(value, appointment.id)}

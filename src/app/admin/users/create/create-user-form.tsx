@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/button'
 import Input from '@/components/input'
 import { courses } from '@/consts/courses'
-import { CustomSelect } from '@/components/custom-select'
 import { FormAnnotation } from '@/components/form-annotation'
 import { DialogComponent } from '@/components/dialog'
 
@@ -21,6 +20,9 @@ const createUserSchema = z.object({
     required_error: 'O nível de escolaridade é obrigatório',
   }),
   role: z.string({ required_error: 'O nível de acesso é obrigatório' }),
+  cellphone: z.string().optional(),
+  birthday: z.string().optional(),
+  isActive: z.boolean().optional(),
 })
 
 type CreateUserData = z.infer<typeof createUserSchema>
@@ -29,6 +31,14 @@ const courseOptions = courses.map((course) => ({
   value: course,
   label: course,
 }))
+
+const educationOptions = [
+  { value: 'Ensino Médio', label: 'Ensino Médio' },
+  { value: 'Graduação', label: 'Graduação' },
+  { value: 'Pós-graduação', label: 'Pós-graduação' },
+  { value: 'Mestrado', label: 'Mestrado' },
+  { value: 'Doutorado', label: 'Doutorado' },
+]
 
 export function CreateUserForm() {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
@@ -40,17 +50,27 @@ export function CreateUserForm() {
     formState: { errors, isSubmitting },
   } = useForm<CreateUserData>({
     resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      isActive: true,
+    },
   })
 
   async function handleCreateUser(data: CreateUserData) {
     console.log('Form data:', data)
     try {
+      const payload = {
+        ...data,
+        cellphone: data.cellphone?.trim() || undefined,
+        birthday: data.birthday || undefined,
+        isActive: data.isActive ?? true,
+      }
+
       const response = await fetch('/api/v1/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
 
       console.log('API response:', response)
@@ -72,74 +92,99 @@ export function CreateUserForm() {
         onSubmit={handleSubmit(handleCreateUser)}
         className="mt-6 flex flex-col gap-4"
       >
-        <Input
-          placeholder="Nome"
-          register={register('name')}
-        />
+        <Input placeholder="Nome" register={register('name')} />
         <FormAnnotation annotation={errors.name?.message} />
 
-        <Input
-          placeholder="E-mail"
-          register={register('email')}
-        />
+        <Input placeholder="E-mail" register={register('email')} />
         <FormAnnotation annotation={errors.email?.message} />
 
-        <Controller
-          name="course"
-          control={control}
-          render={({ field }) => (
-            <>
-              <CustomSelect
-                placeholder="Selecione o curso"
-                options={courseOptions}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.course?.message}
-              />
-              <FormAnnotation annotation={errors.course?.message} />
-            </>
-          )}
+        <label className="mt-2 text-sm font-medium text-zinc-200">
+          Curso
+        </label>
+        <select
+          {...register('course')}
+          className="h-12 w-full rounded-md bg-white px-4 text-black outline-none focus:ring-2 focus:ring-purple-500"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Selecione o curso
+          </option>
+          {courseOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <FormAnnotation annotation={errors.course?.message} />
+
+        <label className="mt-2 text-sm font-medium text-zinc-200">
+          Nível de escolaridade
+        </label>
+        <select
+          {...register('education_level')}
+          className="h-12 w-full rounded-md bg-white px-4 text-black outline-none focus:ring-2 focus:ring-purple-500"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Selecione o nível
+          </option>
+          {educationOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <FormAnnotation annotation={errors.education_level?.message} />
+
+        <label className="mt-2 text-sm font-medium text-zinc-200">
+          Nível de acesso
+        </label>
+        <select
+          {...register('role')}
+          className="h-12 w-full rounded-md bg-white px-4 text-black outline-none focus:ring-2 focus:ring-purple-500"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Selecione o nível de acesso
+          </option>
+          <option value="admin">Administrador</option>
+          <option value="user">Usuário</option>
+        </select>
+        <FormAnnotation annotation={errors.role?.message} />
+
+        <Input
+          placeholder="Celular (opcional)"
+          register={register('cellphone')}
         />
+        <FormAnnotation annotation={errors.cellphone?.message} />
+
+        <label className="text-sm font-medium text-zinc-200">
+          Data de aniversário (opcional)
+        </label>
+        <Input
+          type="date"
+          register={register('birthday')}
+          className="text-black"
+        />
+        <FormAnnotation annotation={errors.birthday?.message} />
 
         <Controller
-          name="education_level"
+          name="isActive"
           control={control}
           render={({ field }) => (
             <>
-              <CustomSelect
-                placeholder="Selecione o nível de escolaridade"
-                options={[
-                  { value: 'Ensino Médio', label: 'Ensino Médio' },
-                  { value: 'Graduação', label: 'Graduação' },
-                  { value: 'Pós-graduação', label: 'Pós-graduação' },
-                  { value: 'Mestrado', label: 'Mestrado' },
-                  { value: 'Doutorado', label: 'Doutorado' },
-                ]}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.education_level?.message}
-              />
-              <FormAnnotation annotation={errors.education_level?.message} />
-            </>
-          )}
-        />
-
-        <Controller
-          name="role"
-          control={control}
-          render={({ field }) => (
-            <>
-              <CustomSelect
-                placeholder="Selecione o nível de acesso"
-                options={[
-                  { value: 'admin', label: 'Administrador' },
-                  { value: 'user', label: 'Usuário' },
-                ]}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.role?.message}
-              />
-              <FormAnnotation annotation={errors.role?.message} />
+              <label className="mt-2 text-sm font-medium text-zinc-200">
+                Status do usuário
+              </label>
+              <select
+                value={field.value ? 'true' : 'false'}
+                onChange={(event) => field.onChange(event.target.value === 'true')}
+                className="h-12 w-full rounded-md bg-white px-4 text-black outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
+              </select>
+              <FormAnnotation annotation={errors.isActive?.message} />
             </>
           )}
         />

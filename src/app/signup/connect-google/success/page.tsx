@@ -25,18 +25,18 @@ export default function SuccessSignUp() {
           </span>
         </p>
         <p className="pt-2 leading-relaxed">
-          Seja muito bem-vindo ao Refúgio Universitário. Agora é só você marcar
-          a melhor data para iniciar os seus estudos.
+          Seja muito bem-vindo ao Refúgio Universitário! Você pode acessar seu
+          perfil e criar decks de estudo.
         </p>
         <div className="mt-5 max-w-[540px]"></div>
         <Button
           isLoading={isLoading}
           onClick={() => {
             setIsLoading(true)
-            router.push('/schedules')
+            router.push('/profile')
           }}
         >
-          Marcar horário
+          Ver perfil
         </Button>
       </div>
     )

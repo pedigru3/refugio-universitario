@@ -16,6 +16,9 @@ model User {
   email           String? @unique
   avatar_url      String?
   role            String?
+  cellphone       String?
+  birthday        DateTime?
+  isActive        Boolean? @default(false)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -23,6 +26,7 @@ model User {
   accounts   Account[]
   sessions   Session[]
   Scheduling Scheduling[]
+  decks      Deck[]
 
   @@map("users")
 }
@@ -116,4 +120,37 @@ model SystemConfig {
   value String
 
   @@map("system_configs")
+}
+
+model Deck {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  user_id     String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user       User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  flashcards Flashcard[]
+
+  @@map("decks")
+}
+
+model Flashcard {
+  id          String   @id @default(uuid())
+  front       String
+  back        String
+  deck_id     String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Spaced Repetition System (SRS) fields
+  next_review DateTime @default(now())
+  interval    Int      @default(0) // Interval in minutes
+  ease_factor Float    @default(2.5)
+  repetitions Int      @default(0)
+
+  deck Deck @relation(fields: [deck_id], references: [id], onDelete: Cascade)
+
+  @@map("flashcards")
 }

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { PrismaAdapter } from '@/lib/auth/prisma-adapter'
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
+import { cookies } from 'next/headers'
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -39,6 +40,14 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ account, profile }) {
+      const cookieStore = cookies()
+      const pendingUser = cookieStore.get('@refugiouniversitario:userId')
+
+      // Se existe pré-cadastro em cookie, permite prosseguir direto
+      if (pendingUser) {
+        return true
+      }
+
       if (
         !account?.scope?.includes('https://www.googleapis.com/auth/calendar')
       ) {

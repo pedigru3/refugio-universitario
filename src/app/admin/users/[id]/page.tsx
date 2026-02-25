@@ -7,15 +7,27 @@ import Input from '@/components/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { courses } from '@/consts/courses'
 
 const editUserSchema = z.object({
     name: z.string().min(3, 'O nome deve ter no mínimo 3 caracteres'),
     role: z.string(),
     course: z.string(),
     educationLevel: z.string(),
+    cellphone: z.string().optional(),
+    birthday: z.string().optional(),
+    isActive: z.boolean(),
 })
+
+const educationOptions = [
+    'Ensino Médio',
+    'Graduação',
+    'Pós-graduação',
+    'Mestrado',
+    'Doutorado',
+]
 
 type EditUserData = z.infer<typeof editUserSchema>
 
@@ -26,6 +38,9 @@ interface User {
     role: string
     course: string
     education_level: string
+    cellphone?: string | null
+    birthday?: string | null
+    isActive?: boolean | null
 }
 
 export default function EditUser({ params }: { params: { id: string } }) {
@@ -36,9 +51,13 @@ export default function EditUser({ params }: { params: { id: string } }) {
         register,
         handleSubmit,
         setValue,
+        control,
         formState: { errors, isSubmitting },
     } = useForm<EditUserData>({
         resolver: zodResolver(editUserSchema),
+        defaultValues: {
+            isActive: true,
+        },
     })
 
     useEffect(() => {
@@ -55,6 +74,12 @@ export default function EditUser({ params }: { params: { id: string } }) {
                 setValue('role', userData.role || 'user')
                 setValue('course', userData.course)
                 setValue('educationLevel', userData.education_level)
+                setValue('cellphone', userData.cellphone || '')
+                setValue(
+                    'birthday',
+                    userData.birthday ? userData.birthday.slice(0, 10) : '',
+                )
+                setValue('isActive', userData.isActive ?? true)
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error)
                 alert('Erro ao carregar usuário')
@@ -66,12 +91,18 @@ export default function EditUser({ params }: { params: { id: string } }) {
 
     async function handleEditUser(data: EditUserData) {
         try {
+            const payload = {
+                ...data,
+                cellphone: data.cellphone?.trim() || null,
+                birthday: data.birthday || null,
+            }
+
             const response = await fetch(`/api/v1/users/${params.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify(payload),
             })
 
             if (!response.ok) {
@@ -145,22 +176,55 @@ export default function EditUser({ params }: { params: { id: string } }) {
                                 <label className="mb-2 block text-sm font-medium text-zinc-700">
                                     Curso
                                 </label>
-                                <Input
-                                    type="text"
-                                    placeholder="Ex: Engenharia"
-                                    register={register('course')}
-                                    className="w-full rounded-lg border-zinc-200 bg-white px-4 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                />
+                                <select
+                                    {...register('course')}
+                                    className="h-12 w-full rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                >
+                                    <option value="">Selecione o curso</option>
+                                    {courses.map((course) => (
+                                        <option key={course} value={course}>
+                                            {course}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-zinc-700">
                                     Nível de Educação
                                 </label>
+                                <select
+                                    {...register('educationLevel')}
+                                    className="h-12 w-full rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                >
+                                    <option value="">Selecione o nível</option>
+                                    {educationOptions.map((level) => (
+                                        <option key={level} value={level}>
+                                            {level}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-zinc-700">
+                                    Celular
+                                </label>
                                 <Input
-                                    type="text"
-                                    placeholder="Ex: Graduação"
-                                    register={register('educationLevel')}
+                                    type="tel"
+                                    placeholder="(99) 99999-9999"
+                                    register={register('cellphone')}
+                                    className="w-full rounded-lg border-zinc-200 bg-white px-4 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-zinc-700">
+                                    Data de aniversário
+                                </label>
+                                <Input
+                                    type="date"
+                                    register={register('birthday')}
                                     className="w-full rounded-lg border-zinc-200 bg-white px-4 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                                 />
                             </div>
@@ -184,6 +248,33 @@ export default function EditUser({ params }: { params: { id: string } }) {
                                 <p className="mt-2 text-xs text-zinc-500">
                                     Administradores têm acesso total às configurações do sistema.
                                 </p>
+                            </div>
+
+                            <div className="col-span-2">
+                                <label className="mb-2 block text-sm font-medium text-zinc-700">
+                                    Status do usuário
+                                </label>
+                                <Controller
+                                    control={control}
+                                    name="isActive"
+                                    render={({ field }) => (
+                                        <div className="relative">
+                                            <select
+                                                value={field.value ? 'true' : 'false'}
+                                                onChange={(event) =>
+                                                    field.onChange(event.target.value === 'true')
+                                                }
+                                                className="h-12 w-full appearance-none rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                            >
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400">
+                                                ▼
+                                            </div>
+                                        </div>
+                                    )}
+                                />
                             </div>
                         </div>
 

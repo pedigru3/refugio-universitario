@@ -2,15 +2,26 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Resend } from 'resend'
+import { cookies } from 'next/headers'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const createUserSchema = z.object({
+const adminCreateUserSchema = z.object({
   name: z.string(),
   email: z.string().email().toLowerCase(),
   course: z.string(),
   education_level: z.string(),
   role: z.string(),
+  cellphone: z.string().optional().nullable(),
+  birthday: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
+})
+
+const signupPreRegisterSchema = z.object({
+  name: z.string(),
+  username: z.string(),
+  course: z.string(),
+  educationLevel: z.string(),
 })
 
 export async function POST(req: Request) {
@@ -19,8 +30,40 @@ export async function POST(req: Request) {
     const body = await req.json()
     console.log('Request body:', body)
 
-    const { name, email, course, education_level, role } =
-      createUserSchema.parse(body)
+    // Fluxo 1: pré-cadastro do signup (sem e-mail ainda)
+    if ('username' in body && !('email' in body)) {
+      const { name, username, course, educationLevel } =
+        signupPreRegisterSchema.parse(body)
+
+      const user = await prisma.user.create({
+        data: {
+          name,
+          username,
+          course,
+          education_level: educationLevel,
+        },
+      })
+
+      // guarda o id em cookie para o PrismaAdapter completar depois
+      cookies().set('@refugiouniversitario:userId', user.id, {
+        path: '/',
+        httpOnly: true,
+      })
+
+      return NextResponse.json({ id: user.id }, { status: 201 })
+    }
+
+    // Fluxo 2: criação via admin (com e-mail e role)
+    const {
+      name,
+      email,
+      course,
+      education_level,
+      role,
+      cellphone,
+      birthday,
+      isActive,
+    } = adminCreateUserSchema.parse(body)
 
     const userExists = await prisma.user.findUnique({
       where: {
@@ -47,6 +90,9 @@ export async function POST(req: Request) {
       course,
       education_level,
       role,
+      cellphone,
+      birthday,
+      isActive,
     })
 
     const user = await prisma.user.create({
@@ -57,6 +103,9 @@ export async function POST(req: Request) {
         course,
         education_level,
         role,
+        cellphone: cellphone?.trim() || null,
+        birthday: birthday ? new Date(birthday) : null,
+        isActive: isActive ?? true,
       },
     })
 

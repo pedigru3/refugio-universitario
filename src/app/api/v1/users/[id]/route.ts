@@ -13,17 +13,39 @@ export async function PUT(
   }
 
   const { id } = params
-  const { name, role, course, educationLevel } = await req.json()
+  const {
+    name,
+    role,
+    course,
+    educationLevel,
+    cellphone,
+    birthday,
+    isActive,
+  } = await req.json()
 
   try {
+    const updateData: Record<string, unknown> = {
+      name,
+      role,
+      course,
+      education_level: educationLevel,
+    }
+
+    if (cellphone !== undefined) {
+      updateData.cellphone = cellphone?.trim() || null
+    }
+
+    if (birthday !== undefined) {
+      updateData.birthday = birthday ? new Date(birthday) : null
+    }
+
+    if (typeof isActive === 'boolean') {
+      updateData.isActive = isActive
+    }
+
     const user = await prisma.user.update({
       where: { id },
-      data: {
-        name,
-        role,
-        course,
-        education_level: educationLevel,
-      },
+      data: updateData,
     })
 
     return Response.json({ user }, { status: 200 })

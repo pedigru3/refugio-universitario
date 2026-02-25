@@ -45,9 +45,14 @@ export function SignUpForm() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { isSubmitting, errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
+    defaultValues: {
+      course: '',
+      educationLevel: '',
+    },
   })
 
   const router = useRouter()
@@ -105,15 +110,17 @@ export function SignUpForm() {
       <Input placeholder="Usuário" register={register('username')} />
       <FormAnnotation annotation={errors.username?.message} />
       <CustomSelect
-        textDefault="Curso ou área de interesse"
-        handleOptionClick={handleCourseOption}
-        options={courses}
+        placeholder="Curso ou área de interesse"
+        options={courses.map((course) => ({ value: course, label: course }))}
+        value={watch('course')}
+        onChange={handleCourseOption}
       />
       <FormAnnotation annotation={errors.course?.message} />
       <CustomSelect
-        textDefault="Nível de escolaridade"
-        handleOptionClick={handleOptionLevel}
-        options={educationLevels}
+        placeholder="Nível de escolaridade"
+        options={educationLevels.map((level) => ({ value: level, label: level }))}
+        value={watch('educationLevel')}
+        onChange={handleOptionLevel}
       />
       <FormAnnotation annotation={errors.educationLevel?.message} />
       <FormAnnotation annotation={errorResquest} />
