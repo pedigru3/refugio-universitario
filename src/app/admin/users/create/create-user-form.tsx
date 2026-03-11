@@ -15,11 +15,9 @@ import { DialogComponent } from '@/components/dialog'
 const createUserSchema = z.object({
   name: z.string().min(3, { message: 'O nome é obrigatório' }),
   email: z.string().email({ message: 'E-mail inválido.' }).toLowerCase(),
-  course: z.string({ required_error: 'O curso é obrigatório' }),
-  education_level: z.string({
-    required_error: 'O nível de escolaridade é obrigatório',
-  }),
-  role: z.string({ required_error: 'O nível de acesso é obrigatório' }),
+  course: z.string().min(1, { message: 'O curso é obrigatório' }),
+  education_level: z.string().min(1, { message: 'O nível de escolaridade é obrigatório' }),
+  role: z.string().min(1, { message: 'O nível de acesso é obrigatório' }),
   cellphone: z.string().optional(),
   birthday: z.string().optional(),
   isActive: z.boolean().optional(),

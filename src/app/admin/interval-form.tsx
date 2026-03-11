@@ -58,7 +58,8 @@ const timeIntervalsFormSchema = z.object({
       },
     ),
   lastDay: z
-    .string({ required_error: 'Preencha o último dia de funcionamento' })
+    .string()
+    .min(1, { message: 'Preencha o último dia de funcionamento' })
     .refine(
       (date) => dayjs(date).isAfter(dayjs(new Date()).hour(23).minute(59)),
       {

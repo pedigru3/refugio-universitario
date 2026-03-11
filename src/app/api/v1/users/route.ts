@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       })
 
       // guarda o id em cookie para o PrismaAdapter completar depois
-      cookies().set('@refugiouniversitario:userId', user.id, {
+      ;(await cookies()).set('@refugiouniversitario:userId', user.id, {
         path: '/',
         httpOnly: true,
       })

@@ -12,11 +12,11 @@ dayjs.extend(dayjsUtc)
 dayjs.extend(timezone)
 
 type RouteParams = {
-  params: { username: string }
+  params: Promise<{ username: string }>
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
-  const username = params.username
+  const { username } = await params
 
   const userExists = await prisma.user.findUnique({
     where: {
@@ -55,7 +55,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
-  const username = params.username
+  const { username } = await params
 
   const [session, userExists] = await Promise.all([
     getServerSession(authOptions),
@@ -104,7 +104,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const schedulingDate = dayjs(date)
 
     const alreadyScheduledTime =
-      userExists.Scheduling.filter((scheduling) => {
+      userExists.Scheduling.filter((scheduling: { date: Date }) => {
         return scheduling.date.toISOString() === new Date(date).toISOString()
       }).length >= 1
 

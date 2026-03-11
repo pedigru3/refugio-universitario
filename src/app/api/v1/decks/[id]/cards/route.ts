@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
@@ -24,7 +25,7 @@ export async function GET(
 
     const deck = await prisma.deck.findFirst({
       where: {
-        id: params.id,
+        id,
         user_id: user.id,
       },
     })
@@ -35,7 +36,7 @@ export async function GET(
 
     const cards = await prisma.flashcard.findMany({
       where: {
-        deck_id: params.id,
+        deck_id: id,
       },
       orderBy: {
         created_at: 'desc',
@@ -51,8 +52,9 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
@@ -71,7 +73,7 @@ export async function POST(
     // Verify deck ownership
     const deck = await prisma.deck.findFirst({
       where: {
-        id: params.id,
+        id,
         user_id: user.id,
       },
     })
@@ -91,7 +93,7 @@ export async function POST(
       data: {
         front,
         back,
-        deck_id: params.id,
+        deck_id: id,
       },
     })
 

@@ -51,7 +51,7 @@ export function TableForm() {
     handleSubmit,
     register,
     formState: { isSubmitting, errors },
-  } = useForm<TableFormInput>({
+  } = useForm<TableFormInput, any, TableFormOutput>({
     resolver: zodResolver(tableFormSchema),
   })
 

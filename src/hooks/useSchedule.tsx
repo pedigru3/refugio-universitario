@@ -19,7 +19,7 @@ export function useSchedule() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
 
-  const hour = useRef<number>()
+  const hour = useRef<number | undefined>(undefined)
 
   // tables
 

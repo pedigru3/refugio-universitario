@@ -23,10 +23,10 @@ const signUpFormSchema = z.object({
     })
     .transform((username) => username.toLowerCase()),
   course: z
-    .string({ required_error: 'É preciso selecionar uma opção' })
+    .string()
     .min(3, { message: 'É preciso selecionar uma opção' }),
   educationLevel: z
-    .string({ required_error: 'É preciso selecionar uma opção' })
+    .string()
     .min(3, { message: 'É preciso selecionar uma opção' }),
 })
 

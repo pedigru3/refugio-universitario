@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ account, profile }) {
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       const pendingUser = cookieStore.get('@refugiouniversitario:userId')
 
       // Se existe pré-cadastro em cookie, permite prosseguir direto

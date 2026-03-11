@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 export function PrismaAdapter(): Adapter {
   return {
     async createUser(user: AdapterUser) {
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       const cookiesResponse = cookieStore.get('@refugiouniversitario:userId')
 
       if (!cookiesResponse?.value) {
@@ -27,7 +27,7 @@ export function PrismaAdapter(): Adapter {
         },
       })
 
-      cookies().delete('@refugiouniversitario:userId')
+      ;(await cookies()).delete('@refugiouniversitario:userId')
 
       return {
         id: prismaUser.id,

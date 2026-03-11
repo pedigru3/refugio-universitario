@@ -63,8 +63,9 @@ function calculateNextReview(
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
@@ -88,7 +89,7 @@ export async function POST(
     }
 
     const card = await prisma.flashcard.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         deck: true,
       },
@@ -111,7 +112,7 @@ export async function POST(
     nextReview.setMinutes(nextReview.getMinutes() + interval)
 
     const updatedCard = await prisma.flashcard.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         interval,
         repetitions,
