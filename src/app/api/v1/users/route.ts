@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       name,
       email,
       course,
-      education_level,
+      education_level: educationLevel,
       role,
       cellphone,
       birthday,
@@ -83,25 +83,13 @@ export async function POST(req: Request) {
       .toString(36)
       .substring(2, 7)}`
 
-    console.log('Creating user with data:', {
-      name,
-      email,
-      username,
-      course,
-      education_level,
-      role,
-      cellphone,
-      birthday,
-      isActive,
-    })
-
     const user = await prisma.user.create({
       data: {
         name,
         email,
         username,
         course,
-        education_level,
+        education_level: educationLevel,
         role,
         cellphone: cellphone?.trim() || null,
         birthday: birthday ? new Date(birthday) : null,
@@ -151,6 +139,18 @@ export async function POST(req: Request) {
       )
     }
 
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 },
+    )
+  }
+}
+
+export async function GET() {
+  try {
+    const users = await prisma.user.findMany()
+    return NextResponse.json({ users }, { status: 200 })
+  } catch (error) {
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 },
