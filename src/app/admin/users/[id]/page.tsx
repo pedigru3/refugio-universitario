@@ -43,7 +43,10 @@ interface User {
     isActive?: boolean | null
 }
 
-export default function EditUser({ params }: { params: { id: string } }) {
+import React from 'react'
+
+export default function EditUser({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+    const params = React.use(paramsPromise)
     const [user, setUser] = useState<User | null>(null)
     const router = useRouter()
 

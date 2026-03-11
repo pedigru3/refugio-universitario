@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  const lastDay = availableWeekDays[0].final_day
-  const startDay = availableWeekDays[0].start_day
+  const lastDay = availableWeekDays.length > 0 ? availableWeekDays[0].final_day : null
+  const startDay = availableWeekDays.length > 0 ? availableWeekDays[0].start_day : null
 
   const weekDays = [0, 1, 2, 3, 4, 5, 6]
 

@@ -36,7 +36,7 @@ export function SignUpForm() {
   const session = useSession()
   const isSignIn = session.status === 'authenticated'
   if (isSignIn) {
-    redirect('/schedules')
+    redirect('/profile')
   }
 
   const [errorResquest, setErrorRequest] = useState<string | undefined>()

@@ -9,11 +9,11 @@ import { Button } from '@/components/button'
 import { MagnifyingGlass } from '@phosphor-icons/react/dist/ssr'
 
 interface UsersPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string
     search?: string
     onlyActive?: string
-  }
+  }>
 }
 
 export default async function UsersPage({ searchParams }: UsersPageProps) {
@@ -23,9 +23,15 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     redirect('/')
   }
 
-  const page = Number(searchParams.page) || 1
-  const search = searchParams.search || ''
-  const onlyActive = searchParams.onlyActive === 'true'
+  const {
+    page: pageParam,
+    search: searchParam,
+    onlyActive: onlyActiveParam,
+  } = await searchParams
+
+  const page = Number(pageParam) || 1
+  const search = searchParam || ''
+  const onlyActive = onlyActiveParam === 'true'
   const limit = 10
   const skip = (page - 1) * limit
 

@@ -217,7 +217,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Meus Decks */}
+        {/* Meus Decks 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -235,6 +235,7 @@ export default function Profile() {
           </div>
           <MyDecks />
         </div>
+        */}
       </Container>
     </div>
   )
