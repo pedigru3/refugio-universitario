@@ -16,7 +16,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.3.2",
+    "@hookform/resolvers": "^5.2.2",
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^5.5.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",
