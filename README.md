@@ -2,13 +2,13 @@
 
 ## Descrição do Projeto
 
-O **[Refúgio Universitário](https://refugiouniversitario.com.br/)** é um projeto dedicado a proporcionar um ambiente propício para estudos em grupo para estudantes universitários. Através deste site, os usuários podem agendar um dia e horário de sua escolha para reservar uma mesa individual ou para o grupo de estudo.
+O **[Refúgio Universitário](https://refugiouniversitario.com.br/)** é um projeto dedicado a proporcionar um ambiente propício para estudos em grupo para estudantes universitários. Através deste site, os usuários podem agendar um dia e horário de sua escolha para reservar uma mesa individual ou para o grupo de estudo!
 
 ## Funcionalidades
 
 - **Escolha de data:** Os usuários podem navegar pelo calendário disponível e selecionar a data desejada para reserva.
 - **Reserva de Mesa:** Oferecemos a opção de escolher entre mesas individuais ou para grupos, garantindo uma experiência personalizada.
-- **Calendário Google:** Ao reservar o estudo, os usuários poderão ver o evento no Calendário do Google. 
+- **Calendário Google:** Ao reservar o estudo, os usuários poderão ver o evento no Calendário do Google.
 - **Perfil do Usuário:** Cada usuário tem seu próprio perfil, onde podem visualizar histórico de reservas, editar preferências e informações pessoais.
 
 ## Como Utilizar
@@ -25,11 +25,13 @@ Para rodar o projeto localmente, certifique-se de ter o Docker instalado em sua 
 Depois, siga os passos abaixo:
 
 1. Clone este repositório:
+
 ```bash
   git clone https://github.com/pedigru3/refugio-universitario.git
 ```
 
 2. Instale as dependências:
+
 ```bash
     cd refugio-universitario
     npm install
@@ -38,6 +40,7 @@ Depois, siga os passos abaixo:
 3. Copie o arquivo .exemple.env para .env e preencha os campos que faltam.
 
 4. Habilite o Google Calendar API e pegue os ID's:
+
 - Acesse[Google Cloud Console](https://console.cloud.google.com/).
 - Crie um novo projeto web.
 - Navegue até "API e Serviços" > "Biblioteca".
@@ -48,11 +51,13 @@ Depois, siga os passos abaixo:
 - Em URI de redirecionamento, coloque http://localhost:3000/api/auth/callback/google
 
 5. Habilite o Serviço de e-mail.
+
 - Crie uma conta no [Resend](https://resend.com/)
 - Crie um token e coloque no arquivo .env na variável RESEND_API_KEY
 
 6. Inicie o servidor local:
-```bash 
+
+```bash
     npm run dev
 ```
 
