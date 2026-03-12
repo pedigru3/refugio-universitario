@@ -17,7 +17,7 @@ export async function PUT(
     name,
     role,
     course,
-    educationLevel,
+    education_level,
     cellphone,
     birthday,
     isActive,
@@ -28,7 +28,7 @@ export async function PUT(
       name,
       role,
       course,
-      education_level: educationLevel,
+      education_level,
     }
 
     if (cellphone !== undefined) {

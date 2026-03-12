@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomSelect } from './custom-select'
 import { courses } from '@/consts/courses'
+import { educationLevels } from '@/consts/education-levels'
 import { FormAnnotation } from './form-annotation'
 
 import { useRouter, redirect } from 'next/navigation'
@@ -25,7 +26,7 @@ const signUpFormSchema = z.object({
   course: z
     .string()
     .min(3, { message: 'É preciso selecionar uma opção' }),
-  educationLevel: z
+  education_level: z
     .string()
     .min(3, { message: 'É preciso selecionar uma opção' }),
 })
@@ -51,26 +52,12 @@ export function SignUpForm() {
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       course: '',
-      educationLevel: '',
+      education_level: '',
     },
   })
 
   const router = useRouter()
 
-  const educationLevels: string[] = [
-    'Fundamental - Incompleto',
-    'Fundamental - Completo',
-    'Médio - Incompleto',
-    'Médio - Completo',
-    'Superior - Incompleto',
-    'Superior - Completo',
-    'Pós-graduação - Incompleto',
-    'Pós-graduação - Completo',
-    'Mestrado - Incompleto',
-    'Mestrado - Completo',
-    'Doutorado - Incompleto',
-    'Doutorado - Completo',
-  ]
 
   async function handlePreRegister(data: SignUpFormData) {
     try {
@@ -80,7 +67,7 @@ export function SignUpForm() {
           name: data.name,
           username: data.username,
           course: data.course,
-          educationLevel: data.educationLevel,
+          education_level: data.education_level,
         }),
       })
       if (result.ok) {
@@ -93,7 +80,7 @@ export function SignUpForm() {
   }
 
   function handleOptionLevel(value: string) {
-    setValue('educationLevel', value)
+    setValue('education_level', value)
   }
 
   function handleCourseOption(value: string) {
@@ -119,10 +106,10 @@ export function SignUpForm() {
       <CustomSelect
         placeholder="Nível de escolaridade"
         options={educationLevels.map((level) => ({ value: level, label: level }))}
-        value={watch('educationLevel')}
+        value={watch('education_level')}
         onChange={handleOptionLevel}
       />
-      <FormAnnotation annotation={errors.educationLevel?.message} />
+      <FormAnnotation annotation={errors.education_level?.message} />
       <FormAnnotation annotation={errorResquest} />
 
       <Button isLoading={isSubmitting} type="submit">

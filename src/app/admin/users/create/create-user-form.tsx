@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/button'
 import Input from '@/components/input'
 import { courses } from '@/consts/courses'
+import { educationLevels } from '@/consts/education-levels'
 import { FormAnnotation } from '@/components/form-annotation'
 import { DialogComponent } from '@/components/dialog'
 
@@ -30,13 +31,10 @@ const courseOptions = courses.map((course) => ({
   label: course,
 }))
 
-const educationOptions = [
-  { value: 'Ensino Médio', label: 'Ensino Médio' },
-  { value: 'Graduação', label: 'Graduação' },
-  { value: 'Pós-graduação', label: 'Pós-graduação' },
-  { value: 'Mestrado', label: 'Mestrado' },
-  { value: 'Doutorado', label: 'Doutorado' },
-]
+const educationOptions = educationLevels.map((level) => ({
+  value: level,
+  label: level,
+}))
 
 export function CreateUserForm() {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
