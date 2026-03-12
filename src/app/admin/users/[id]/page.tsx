@@ -10,24 +10,18 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { courses } from '@/consts/courses'
+import { educationLevels } from '@/consts/education-levels'
 
 const editUserSchema = z.object({
     name: z.string().min(3, 'O nome deve ter no mínimo 3 caracteres'),
     role: z.string(),
     course: z.string(),
-    educationLevel: z.string(),
+    education_level: z.string(),
     cellphone: z.string().optional(),
     birthday: z.string().optional(),
     isActive: z.boolean(),
 })
 
-const educationOptions = [
-    'Ensino Médio',
-    'Graduação',
-    'Pós-graduação',
-    'Mestrado',
-    'Doutorado',
-]
 
 type EditUserData = z.infer<typeof editUserSchema>
 
@@ -76,7 +70,7 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
                 setValue('name', userData.name)
                 setValue('role', userData.role || 'user')
                 setValue('course', userData.course)
-                setValue('educationLevel', userData.education_level)
+                setValue('education_level', userData.education_level)
                 setValue('cellphone', userData.cellphone || '')
                 setValue(
                     'birthday',
@@ -197,11 +191,11 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
                                     Nível de Educação
                                 </label>
                                 <select
-                                    {...register('educationLevel')}
+                                    {...register('education_level')}
                                     className="h-12 w-full rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                                 >
                                     <option value="">Selecione o nível</option>
-                                    {educationOptions.map((level) => (
+                                    {educationLevels.map((level) => (
                                         <option key={level} value={level}>
                                             {level}
                                         </option>
