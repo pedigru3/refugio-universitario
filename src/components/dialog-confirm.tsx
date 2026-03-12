@@ -17,7 +17,6 @@ export function DialogConfirm({
 }) {
   return (
     <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
-      <Dialog.Trigger />
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black opacity-50 data-[state=open]:animate-overlayShow fixed inset-0" />
         <Dialog.Content

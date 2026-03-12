@@ -10,8 +10,10 @@ export function MenuMobile() {
   const { data: session } = useSession()
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        <List size={32} />
+      <DropdownMenu.Trigger asChild>
+        <button suppressHydrationWarning className="focus:outline-none">
+          <List size={32} />
+        </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
         className="flex z-50 justify-center items-center flex-col min-w-[200px] shadow-md bg-white rounded-md p-2
