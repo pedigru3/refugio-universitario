@@ -20,7 +20,7 @@ export async function PUT(
     education_level,
     cellphone,
     birthday,
-    isActive,
+    expires_at,
   } = await req.json()
 
   try {
@@ -39,8 +39,8 @@ export async function PUT(
       updateData.birthday = birthday ? new Date(birthday) : null
     }
 
-    if (typeof isActive === 'boolean') {
-      updateData.isActive = isActive
+    if (expires_at !== undefined) {
+      updateData.expires_at = expires_at ? new Date(expires_at) : null
     }
 
     const user = await prisma.user.update({

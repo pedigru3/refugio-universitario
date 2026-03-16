@@ -19,7 +19,7 @@ const editUserSchema = z.object({
     education_level: z.string(),
     cellphone: z.string().optional(),
     birthday: z.string().optional(),
-    isActive: z.boolean(),
+    expires_at: z.string().optional(),
 })
 
 
@@ -34,7 +34,7 @@ interface User {
     education_level: string
     cellphone?: string | null
     birthday?: string | null
-    isActive?: boolean | null
+    expires_at?: string | null
 }
 
 import React from 'react'
@@ -53,7 +53,7 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
     } = useForm<EditUserData>({
         resolver: zodResolver(editUserSchema),
         defaultValues: {
-            isActive: true,
+            expires_at: '',
         },
     })
 
@@ -76,7 +76,10 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
                     'birthday',
                     userData.birthday ? userData.birthday.slice(0, 10) : '',
                 )
-                setValue('isActive', userData.isActive ?? true)
+                setValue(
+                    'expires_at',
+                    userData.expires_at ? userData.expires_at.slice(0, 10) : '',
+                )
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error)
                 alert('Erro ao carregar usuário')
@@ -92,6 +95,7 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
                 ...data,
                 cellphone: data.cellphone?.trim() || null,
                 birthday: data.birthday || null,
+                expires_at: data.expires_at ? new Date(data.expires_at).toISOString() : null,
             }
 
             const response = await fetch(`/api/v1/users/${params.id}`, {
@@ -249,29 +253,16 @@ export default function EditUser({ params: paramsPromise }: { params: Promise<{ 
 
                             <div className="col-span-2">
                                 <label className="mb-2 block text-sm font-medium text-zinc-700">
-                                    Status do usuário
+                                    Expira em (Atividade do Usuário)
                                 </label>
-                                <Controller
-                                    control={control}
-                                    name="isActive"
-                                    render={({ field }) => (
-                                        <div className="relative">
-                                            <select
-                                                value={field.value ? 'true' : 'false'}
-                                                onChange={(event) =>
-                                                    field.onChange(event.target.value === 'true')
-                                                }
-                                                className="h-12 w-full appearance-none rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                            >
-                                                <option value="true">Ativo</option>
-                                                <option value="false">Inativo</option>
-                                            </select>
-                                            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400">
-                                                ▼
-                                            </div>
-                                        </div>
-                                    )}
+                                <Input
+                                    type="date"
+                                    register={register('expires_at')}
+                                    className="w-full rounded-lg border-zinc-200 bg-white px-4 py-2 text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                                 />
+                                <p className="mt-2 text-xs text-zinc-500">
+                                    O usuário é considerado ativo se a data atual for anterior à data de expiração.
+                                </p>
                             </div>
                         </div>
 

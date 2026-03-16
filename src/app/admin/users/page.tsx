@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Button } from '@/components/button'
 import { MagnifyingGlass } from '@phosphor-icons/react/dist/ssr'
+import dayjs from 'dayjs'
 
 interface UsersPageProps {
   searchParams: Promise<{
@@ -40,7 +41,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       contains: search,
       mode: 'insensitive' as const,
     },
-    ...(onlyActive ? { isActive: true } : {}),
+    ...(onlyActive ? { expires_at: { gte: new Date() } } : {}),
   }
 
   const [users, totalUsers] = await Promise.all([
@@ -127,7 +128,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
             </thead>
             <tbody>
               {users.map((user) => {
-                const isActive = user.isActive ?? false
+                const isActive = user.expires_at ? dayjs(user.expires_at).isAfter(dayjs()) : false
                 const roleLabel = user.role === 'admin' ? 'Admin' : 'Usuário'
 
                 return (

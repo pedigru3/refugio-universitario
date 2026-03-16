@@ -101,13 +101,21 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    await prisma.scheduling.create({
-      data: {
-        date,
-        user_id: userExists.id,
-        table_id: null as any,
-      },
-    })
+    await Promise.all([
+      prisma.scheduling.create({
+        data: {
+          date,
+          user_id: userExists.id,
+          table_id: null as any,
+        },
+      }),
+      prisma.user.update({
+        where: { id: userExists.id },
+        data: {
+          expires_at: dayjs().add(30, 'days').toISOString(),
+        },
+      }),
+    ])
 
     const calendar = google.calendar({
       version: 'v3',

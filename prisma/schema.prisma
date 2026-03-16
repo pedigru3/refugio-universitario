@@ -18,7 +18,7 @@ model User {
   role            String?
   cellphone       String?
   birthday        DateTime?
-  isActive        Boolean? @default(false)
+  expires_at      DateTime? @default(now())
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

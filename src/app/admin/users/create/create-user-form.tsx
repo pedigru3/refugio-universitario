@@ -21,7 +21,7 @@ const createUserSchema = z.object({
   role: z.string().min(1, { message: 'O nível de acesso é obrigatório' }),
   cellphone: z.string().optional(),
   birthday: z.string().optional(),
-  isActive: z.boolean().optional(),
+  expires_at: z.string().optional(),
 })
 
 type CreateUserData = z.infer<typeof createUserSchema>
@@ -47,9 +47,9 @@ export function CreateUserForm() {
   } = useForm<CreateUserData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      isActive: true,
+      expires_at: '',
     },
-  })
+})
 
   async function handleCreateUser(data: CreateUserData) {
     console.log('Form data:', data)
@@ -58,7 +58,7 @@ export function CreateUserForm() {
         ...data,
         cellphone: data.cellphone?.trim() || undefined,
         birthday: data.birthday || undefined,
-        isActive: data.isActive ?? true,
+        expires_at: data.expires_at ? new Date(data.expires_at).toISOString() : undefined,
       }
 
       const response = await fetch('/api/v1/users', {
@@ -164,26 +164,17 @@ export function CreateUserForm() {
         />
         <FormAnnotation annotation={errors.birthday?.message} />
 
-        <Controller
-          name="isActive"
-          control={control}
-          render={({ field }) => (
-            <>
-              <label className="mt-2 text-sm font-medium text-zinc-200">
-                Status do usuário
-              </label>
-              <select
-                value={field.value ? 'true' : 'false'}
-                onChange={(event) => field.onChange(event.target.value === 'true')}
-                className="h-12 w-full rounded-md bg-white px-4 text-black outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="true">Ativo</option>
-                <option value="false">Inativo</option>
-              </select>
-              <FormAnnotation annotation={errors.isActive?.message} />
-            </>
-          )}
+        <label className="mt-2 text-sm font-medium text-zinc-200">
+          Expira em (Atividade do Usuário)
+        </label>
+        <Input
+          type="date"
+          register={register('expires_at')}
+          className="text-black"
         />
+        <FormAnnotation>
+          O usuário é considerado ativo se a data atual for anterior à data de expiração.
+        </FormAnnotation>
 
         <FormAnnotation>
           O usuário receberá um e-mail para confirmar sua conta.

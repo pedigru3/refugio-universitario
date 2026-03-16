@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Resend } from 'resend'
 import { cookies } from 'next/headers'
+import dayjs from 'dayjs'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -14,7 +15,7 @@ const adminCreateUserSchema = z.object({
   role: z.string(),
   cellphone: z.string().optional().nullable(),
   birthday: z.string().optional().nullable(),
-  isActive: z.boolean().optional(),
+  expires_at: z.string().optional().nullable(),
 })
 
 const signupPreRegisterSchema = z.object({
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
       role,
       cellphone,
       birthday,
-      isActive,
+      expires_at: expiresAt,
     } = adminCreateUserSchema.parse(body)
 
     const userExists = await prisma.user.findUnique({
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
         role,
         cellphone: cellphone?.trim() || null,
         birthday: birthday ? new Date(birthday) : null,
-        isActive: isActive ?? true,
+        expires_at: expiresAt ? new Date(expiresAt) : dayjs().add(30, 'days').toDate(),
       },
     })
 
