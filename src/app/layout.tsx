@@ -31,7 +31,7 @@ export default async function RootLayout({
 
   return (
     <html className="" lang="pt-br">
-      <body className={`${inter.className} ${plusJakartaSans.variable}`}>
+      <body className={`${inter.className} ${plusJakartaSans.variable}`} suppressHydrationWarning>
         <AuthProvider session={session}>{children}</AuthProvider>
       </body>
     </html>

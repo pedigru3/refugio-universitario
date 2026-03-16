@@ -11,6 +11,9 @@ declare module 'next-auth' {
     education_level: string
     avatar_url: string | null
     role: string
+    cellphone: string | null
+    birthday: Date | null
+    expires_at: Date | null
   }
 
   interface Session {

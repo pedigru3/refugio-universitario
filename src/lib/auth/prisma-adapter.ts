@@ -39,6 +39,9 @@ export function PrismaAdapter(): Adapter {
         course: prismaUser.course,
         education_level: prismaUser.education_level,
         role: prismaUser.role ?? 'user',
+        cellphone: prismaUser.cellphone,
+        birthday: prismaUser.birthday,
+        expires_at: prismaUser.expires_at,
       }
     },
 
@@ -63,6 +66,9 @@ export function PrismaAdapter(): Adapter {
         course: user.course,
         education_level: user.education_level,
         role: user.role ?? 'user',
+        cellphone: user.cellphone,
+        birthday: user.birthday,
+        expires_at: user.expires_at,
       }
     },
 
@@ -87,6 +93,9 @@ export function PrismaAdapter(): Adapter {
         course: user.course,
         education_level: user.education_level,
         role: user.role ?? 'user',
+        cellphone: user.cellphone,
+        birthday: user.birthday,
+        expires_at: user.expires_at,
       }
     },
 
@@ -123,6 +132,9 @@ export function PrismaAdapter(): Adapter {
         course: user.course,
         education_level: user.education_level,
         role: user.role ?? 'user',
+        cellphone: user.cellphone,
+        birthday: user.birthday,
+        expires_at: user.expires_at,
       }
     },
 
@@ -151,6 +163,9 @@ export function PrismaAdapter(): Adapter {
         course: prismaUser.course,
         education_level: prismaUser.education_level,
         role: prismaUser.role ?? 'user',
+        cellphone: prismaUser.cellphone,
+        birthday: prismaUser.birthday,
+        expires_at: prismaUser.expires_at,
       }
     },
 
@@ -233,6 +248,9 @@ export function PrismaAdapter(): Adapter {
           course: user.course,
           education_level: user.education_level,
           role: user.role ?? 'user',
+          cellphone: user.cellphone,
+          birthday: user.birthday,
+          expires_at: user.expires_at,
         },
       }
     },

@@ -8,11 +8,14 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions)
 
-  if (session?.user.role !== 'admin') {
+  const { id } = await params
+  const isOwner = session?.user.id === id
+  const isAdmin = session?.user.role === 'admin'
+
+  if (!isAdmin && !isOwner) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { id } = await params
   const {
     name,
     role,
@@ -22,6 +25,11 @@ export async function PUT(
     birthday,
     expires_at,
   } = await req.json()
+
+  // Prevent non-admins from changing role or expires_at
+  if (!isAdmin && (role !== undefined || expires_at !== undefined)) {
+    return Response.json({ error: 'Forbidden: Cannot change sensitive fields' }, { status: 403 })
+  }
 
   try {
     const updateData: Record<string, unknown> = {

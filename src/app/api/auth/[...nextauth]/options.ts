@@ -35,6 +35,9 @@ export const authOptions: NextAuthOptions = {
           course: '',
           education_level: '',
           role: profile.role ?? 'user',
+          cellphone: null,
+          birthday: null,
+          expires_at: null,
         }
       },
       allowDangerousEmailAccountLinking: true,
@@ -94,6 +97,9 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           course: user.course,
           education_level: user.education_level,
+          cellphone: user.cellphone,
+          birthday: user.birthday,
+          expires_at: user.expires_at,
         },
         expires,
       }
