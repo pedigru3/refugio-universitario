@@ -7,6 +7,9 @@ import dayjsUtc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(timezone)
@@ -136,6 +139,35 @@ export async function POST(request: Request, { params }: RouteParams) {
         attendees: [{ email: userExists.email, displayName: userExists.name }],
       },
     })
+
+    // Enviar e-mail de notificação para o administrador (apenas se for usuário comum)
+    if (session?.user.role !== 'admin') {
+      try {
+        await resend.emails.send({
+          from: 'Refúgio <notificacao@refugiouniversitario.com.br>',
+          to: ['ferreira.contato1@gmail.com'],
+          subject: `Novo Agendamento: ${userExists.name}`,
+          html: `
+          <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h2 style="color: #A046F5;">Novo Agendamento Realizado!</h2>
+              <p>Um novo agendamento foi feito na plataforma:</p>
+              <ul style="list-style: none; padding: 0;">
+                <li><strong>Estudante:</strong> ${userExists.name}</li>
+                <li><strong>E-mail:</strong> ${userExists.email}</li>
+                <li><strong>Data/Hora:</strong> ${schedulingDate.format('DD/MM/YYYY [às] HH:mm')}</li>
+              </ul>
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 12px; color: #777;">Este é um e-mail automático do sistema Refúgio Universitário.</p>
+            </body>
+          </html>
+          `,
+        })
+      } catch (emailError) {
+        console.error('Erro ao enviar e-mail de notificação:', emailError)
+        // Não falha a requisição se apenas o e-mail falhar
+      }
+    }
 
     return Response.json({}, { status: 201 })
   } catch (error) {
