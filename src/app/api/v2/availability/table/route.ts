@@ -49,31 +49,33 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  interface Appoitment {
+  interface Appointment {
     date: Date
     table: {
       chair_count: number
-    }
+    } | null
   }
 
-  interface AppoitmentResponse {
+  interface AppointmentResponse {
     date: string
     count: number
     max: number
   }
 
-  function groupByDate(objects: Appoitment[]): AppoitmentResponse[] {
+  function groupByDate(objects: Appointment[]): AppointmentResponse[] {
     const groupedObjects: {
       [key: string]: { count: number; max: number }
     } = {}
 
     objects.forEach((obj) => {
       const dateString = obj.date.toISOString() // Obter a data como uma string ISO completa
+      const maxCapacity = obj.table?.chair_count || 20
+
       if (!groupedObjects[dateString]) {
-        groupedObjects[dateString] = { count: 0, max: obj.table.chair_count }
+        groupedObjects[dateString] = { count: 0, max: maxCapacity }
       }
       groupedObjects[dateString].count++
-      groupedObjects[dateString].max = obj.table.chair_count
+      groupedObjects[dateString].max = maxCapacity
     })
 
     return Object.keys(groupedObjects).map((key) => ({
