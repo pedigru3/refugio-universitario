@@ -79,7 +79,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   const BorySchema = z.object({
     date: z.string(),
-    table_id: z.string().uuid(),
+    table_id: z.string().uuid().optional(),
     spent_time_in_minutes: z.number().optional(),
   })
 
@@ -87,18 +87,68 @@ export async function POST(request: Request, { params }: RouteParams) {
     const bory = await request.json()
     const {
       date,
-      table_id: tableId,
+      table_id: incomingTableId,
       spent_time_in_minutes: spentTimeInMinutes,
     } = BorySchema.parse(bory)
 
-    const table = await prisma.table.findUnique({
-      where: {
-        id: tableId,
-      },
-    })
+    let tableId = incomingTableId
 
-    if (!table) {
-      return Response.json({ error: 'invalid Table' }, { status: 400 })
+    if (!tableId) {
+      // Automatic table selection
+      const referenceDate = dayjs(date).toDate()
+
+      const allTables = await prisma.table.findMany({
+        select: {
+          id: true,
+          chair_count: true,
+        },
+      })
+
+      const tablesWithSchedulings = await prisma.table.findMany({
+        where: {
+          schedulings: {
+            some: {
+              date: referenceDate,
+            },
+          },
+        },
+        include: {
+          schedulings: {
+            where: {
+              date: referenceDate,
+            },
+          },
+        },
+      })
+
+      const tablesWithSchedulingsMap = new Map(
+        tablesWithSchedulings.map((item) => [item.id, item]),
+      )
+
+      const availableTable = allTables.find((table) => {
+        const currentTable = tablesWithSchedulingsMap.get(table.id)
+        if (!currentTable) return true
+        return currentTable.schedulings.length < table.chair_count
+      })
+
+      if (!availableTable) {
+        return Response.json(
+          { error: 'No tables available at this time' },
+          { status: 400 },
+        )
+      }
+
+      tableId = availableTable.id
+    } else {
+      const table = await prisma.table.findUnique({
+        where: {
+          id: tableId,
+        },
+      })
+
+      if (!table) {
+        return Response.json({ error: 'invalid Table' }, { status: 400 })
+      }
     }
 
     const schedulingDate = dayjs(date)

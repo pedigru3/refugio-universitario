@@ -41,9 +41,9 @@ export default async function Home() {
                 <div className="mt-8 inline-block rounded-3xl bg-yellow-400 py-2 text-lg font-medium text-black md:rounded-[2rem] md:py-4 md:px-4">
                   <Link
                     className="px-8 py-2 text-md font-semibold md:text-xl"
-                    href="/schedules"
+                    href="/agendamento"
                   >
-                    Inscreva-se grátis
+                    Agendar Horário
                   </Link>
                 </div>
               )}

@@ -56,15 +56,8 @@ export function useSchedule() {
 
   async function handleSelectTime(time: number) {
     hour.current = time
-    const dateWithTime = dayjs(selectedDate).set('hour', time).startOf('hour')
-    const dateFormated = dateWithTime.format('YYYY-MM-DD')
-    const response = await fetch(
-      `/api/v1/availability/table?date=${dateFormated}&hour=${time}`,
-    )
-    const data = await response.json()
-    const availabilityTables: AvailabilityTables[] = data.availability
-    setAvailabilityTables(availabilityTables)
-    setTableId('')
+    // Force re-render to show the confirmation section
+    setTableId(String(time))
   }
 
   function handleSelectTable(isTableSelected: boolean, tableId: string) {

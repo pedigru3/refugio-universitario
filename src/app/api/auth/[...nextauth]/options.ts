@@ -58,12 +58,24 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (account?.provider === 'google' && profile?.email) {
+        const googleProfile = profile as GoogleProfile
+
         const userExists = await prisma.user.findUnique({
           where: { email: profile.email },
         })
 
         if (!userExists) {
           return '/signup?error=unregistered'
+        }
+
+        if (
+          googleProfile.picture &&
+          userExists.avatar_url !== googleProfile.picture
+        ) {
+          await prisma.user.update({
+            where: { email: profile.email },
+            data: { avatar_url: googleProfile.picture },
+          })
         }
       }
 
