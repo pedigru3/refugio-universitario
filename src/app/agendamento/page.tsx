@@ -2,8 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
-import { redirect, useRouter } from 'next/navigation'
-
+import { useRouter } from 'next/navigation'
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
 import { Loading } from '@/components/loading'
@@ -16,9 +15,16 @@ import { Button } from '@/components/button'
 import { useSchedule } from '@/hooks/useSchedule'
 
 import dayjs from 'dayjs'
+import { useSearchParams } from 'next/navigation'
 
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
+  const searchParams = useSearchParams()
+  const targetUsername = searchParams.get('username')
+  const editId = searchParams.get('edit')
+  const isAdmin = dataSession?.user.role === 'admin'
+  const finalUsername = (isAdmin && targetUsername) ? targetUsername : dataSession?.user.username
+
   const [isSending, setIsSending] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
 
@@ -55,11 +61,15 @@ export default function Agendamento() {
       date: setTime,
     }
 
+    const url = editId 
+      ? `/api/v1/scheduling/${finalUsername}/${editId}`
+      : `/api/v1/scheduling/${finalUsername}`
+
     const response = await fetch(
-      `/api/v1/scheduling/${dataSession?.user.username}`,
+      url,
       {
         body: JSON.stringify(body),
-        method: 'POST',
+        method: editId ? 'PATCH' : 'POST',
       },
     )
 
@@ -79,7 +89,7 @@ export default function Agendamento() {
   return (
     <Container>
       <Title color="light" type="h2">
-        Agendamento
+        {editId ? 'Editar Agendamento' : 'Agendamento'}
       </Title>
       <div
         className={`mt-6 relative grid grid-cols-1 lg:max-w-[540px]
@@ -108,7 +118,13 @@ export default function Agendamento() {
           <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-5">
             <div className="items-center self-center text-white">
               <p className="text-zinc-400">
-                {dataSession?.user.name.split(' ', 1)[0]}, confirme sua reserva:
+                {editId ? (
+                  <>Editando agendamento de <span className="text-emerald-400 font-bold">{finalUsername}</span>, confirme a alteração:</>
+                ) : isAdmin && targetUsername ? (
+                  <>Agendando para <span className="text-emerald-400 font-bold">{targetUsername}</span>, confirme a reserva:</>
+                ) : (
+                  <>{dataSession?.user.name.split(' ', 1)[0]}, confirme sua reserva:</>
+                )}
               </p>
               <div className="mt-2">
                 <p className="font-bold">
@@ -124,7 +140,7 @@ export default function Agendamento() {
                 bgColor={'gray'}
                 className="w-full lg:w-auto px-8"
               >
-                Confirmar Reserva
+                {editId ? 'Confirmar Alteração' : 'Confirmar Reserva'}
               </Button>
             </div>
           </div>

@@ -170,7 +170,13 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                         {roleLabel}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
+                      <Link
+                        href={`/agendamento?username=${user.username}`}
+                        className="text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline"
+                      >
+                        Agendar
+                      </Link>
                       <Link
                         href={`/admin/users/${user.id}`}
                         className="text-sm font-medium text-purple-600 hover:text-purple-700 hover:underline"

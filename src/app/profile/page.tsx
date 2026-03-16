@@ -95,6 +95,9 @@ function MyDecks() {
   )
 }
 
+import { MyAppointments } from './my-appointments'
+import { Calendar } from '@phosphor-icons/react'
+
 export default function Profile() {
   const { data: session, status } = useSession({ required: true })
 
@@ -217,25 +220,16 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Meus Decks 
+        {/* Meus Agendamentos */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl border border-purple-400/30 bg-purple-500/10 p-3">
-                <Cards size={24} weight="bold" className="text-purple-200" />
-              </div>
-              <h2 className="text-lg font-semibold">Meus Decks de estudo</h2>
+          <div className="mb-6 flex items-center gap-3">
+            <div className="rounded-xl border border-purple-400/30 bg-purple-500/10 p-3">
+              <Calendar size={24} weight="bold" className="text-purple-200" />
             </div>
-            <Link
-              href="/decks"
-              className="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-            >
-              Ver todos
-            </Link>
+            <h2 className="text-lg font-semibold">Meus Agendamentos</h2>
           </div>
-          <MyDecks />
+          <MyAppointments />
         </div>
-        */}
       </Container>
     </div>
   )

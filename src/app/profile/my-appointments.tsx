@@ -97,7 +97,7 @@ export function MyAppointments() {
                   {dateAppointment.format('DD [de] MMMM [de] YYYY')}
                 </p>
                 <p className="text-sm text-zinc-400">
-                  {dateAppointment.format('HH:mm')} • {appointment.table.table_name}
+                  {dateAppointment.format('HH:mm')}
                 </p>
               </div>
             </div>

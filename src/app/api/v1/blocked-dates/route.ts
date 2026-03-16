@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { convertNumberTwoDigitsString } from '@/utils/convert-number-two-digits-string'
 import { type NextRequest } from 'next/server'
+import dayjs from 'dayjs'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -34,36 +35,63 @@ export async function GET(request: NextRequest) {
     )
   })
 
+  const config = await prisma.systemConfig.findUnique({
+    where: { key: 'MAX_CAPACITY' },
+  })
+  const MAX_CAPACITY = config ? Number(config.value) : 20
+
   const blockedDatesRaw: Array<{ date: number }> = await prisma.$queryRaw`
-    WITH TotalTables AS (
-      SELECT
-        SUM(chair_count) AS chairs
-      FROM
-        tables
-    )
-    
     SELECT
-      EXTRACT(DAY FROM S.date) AS date,
-      COUNT(S.date) AS amount,
-      (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TT.chairs ) AS size
+      EXTRACT(DAY FROM S.date) AS date
     FROM schedulings S
-
-    LEFT JOIN available_schedules AVS
-      ON AVS.week_day = EXTRACT(DOW FROM S.date)
-
-    CROSS JOIN TotalTables TT
-
+    JOIN available_schedules AVS ON AVS.week_day = EXTRACT(DOW FROM S.date)
     WHERE TO_CHAR(S.date, 'YYYY-MM') = ${`${year}-${month}`}
-
-    GROUP BY EXTRACT(DAY FROM S.date), 
-      ((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60),
-      TT.chairs, AVS.week_day
-
-    HAVING 
-      COUNT(S.date) >= (((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * TT.chairs );
+    GROUP BY EXTRACT(DAY FROM S.date), AVS.time_start_in_minutes, AVS.time_end_in_minutes
+    HAVING COUNT(S.date) >= ((AVS.time_end_in_minutes - AVS.time_start_in_minutes) / 60) * ${MAX_CAPACITY};
   `
 
   const blockedDates = blockedDatesRaw.map((item) => Number(item.date))
 
-  return Response.json({ blockedWeekDays, blockedDates, startDay, lastDay })
+  // Manual blocked dates from the BlockedDates table
+  const manualBlockedDates = await prisma.blockedDates.findMany({
+    where: {
+      date: {
+        gte: dayjs(`${year}-${month}-01`).startOf('month').toISOString(),
+        lte: dayjs(`${year}-${month}-01`).endOf('month').toISOString(),
+      },
+    },
+  })
+
+  const manualBlockedDays = manualBlockedDates.map((d) => dayjs(d.date).get('date'))
+
+  return Response.json({
+    blockedWeekDays,
+    blockedDates: Array.from(new Set([...blockedDates, ...manualBlockedDays])),
+    startDay,
+    lastDay,
+  })
+}
+
+export async function POST(request: NextRequest) {
+  const { date } = await request.json()
+
+  await prisma.blockedDates.create({
+    data: {
+      date: dayjs(date).startOf('day').toISOString(),
+    },
+  })
+
+  return Response.json({ message: 'Date blocked' }, { status: 201 })
+}
+
+export async function DELETE(request: NextRequest) {
+  const { date } = await request.json()
+
+  await prisma.blockedDates.deleteMany({
+    where: {
+      date: dayjs(date).startOf('day').toISOString(),
+    },
+  })
+
+  return Response.json({ message: 'Date unblocked' })
 }

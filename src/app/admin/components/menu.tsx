@@ -21,9 +21,6 @@ export function MenuAdmin() {
         <Link href={'/admin/schedules'}>Agendamentos</Link>
       </li>
       <li>
-        <Link href={'/admin/tables'}>Gerenciar Mesas</Link>
-      </li>
-      <li>
         <Link href={'/admin/users'}>Usuários</Link>
       </li>
       <li>

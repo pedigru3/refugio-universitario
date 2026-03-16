@@ -15,7 +15,7 @@ export function CloseButton({ onClick }: CloseButtomProps) {
   return (
     <Dialog.Root>
       <Dialog.Trigger>
-        <XCircle className="text-black" size={40} />
+        <XCircle className="text-white" size={40} />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black opacity-30 data-[state=open]:animate-overlayShow fixed inset-0" />

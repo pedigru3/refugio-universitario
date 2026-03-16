@@ -23,11 +23,7 @@ const timeIntervalSchema = z.object({
 
 const timeIntervalsBodySchema = z.object({
   intervals: z.array(timeIntervalSchema),
-  lastDay: z
-    .string()
-    .refine((date) =>
-      dayjs(date).isAfter(dayjs(new Date()).hour(23).minute(59)),
-    ),
+  lastDay: z.string(),
   startDay: z.string(),
 })
 
@@ -39,7 +35,19 @@ export async function GET(request: NextRequest) {
   const timeZoneDiff = getTimeZoneOffset()
 
   if (!date) {
-    return Response.json({ error: 'Date not provided.' }, { status: 400 })
+    const session = await getServerSession(authOptions)
+
+    if (session?.user.role !== 'admin') {
+      return Response.json({ error: 'Date not provided.' }, { status: 400 })
+    }
+
+    const availableSchedules = await prisma.availableSchedule.findMany({
+      orderBy: {
+        week_day: 'asc',
+      },
+    })
+
+    return Response.json({ availableSchedules })
   }
 
   const referenceDate = dayjs(String(date))
@@ -92,34 +100,36 @@ export async function GET(request: NextRequest) {
     return startHour + i
   })
 
-  const blockedHoursRaw: Array<{ hour: number; amount: number; size: bigint }> =
-    await prisma.$queryRaw`
-    
-  WITH TotalTables AS (
-    SELECT SUM(chair_count) AS chairs
-    FROM tables
-  ),
+  const config = await prisma.systemConfig.findUnique({
+    where: { key: 'MAX_CAPACITY' },
+  })
+  const MAX_CAPACITY = config ? Number(config.value) : 20
 
-  HourlyCounts AS (
+  const blockedDateManual = await prisma.blockedDates.findFirst({
+    where: {
+      date: referenceDate.startOf('day').toISOString(),
+    },
+  })
+
+  if (blockedDateManual) {
+    return Response.json({
+      possibleTimes: [],
+      availableTimes: [],
+      message: 'Date manually blocked',
+    })
+  }
+
+  const blockedHoursRaw: Array<{ hour: number; amount: number }> =
+    await prisma.$queryRaw`
     SELECT
       EXTRACT(HOUR FROM S.date) AS hour,
       COUNT(S.date) AS amount
     FROM schedulings S
-    LEFT JOIN available_schedules AVS ON AVS.week_day = EXTRACT(DOW FROM S.date)
-    LEFT JOIN tables TB ON TB.id = S.table_id
     WHERE TO_CHAR(S.date, 'YYYY-MM-DD') = ${`${referenceDate.format(
       'YYYY-MM-DD',
     )}`}
     GROUP BY EXTRACT(HOUR FROM S.date)
-  )
-
-  SELECT
-    HC.hour,
-    HC.amount,
-    TT.chairs AS size
-  FROM HourlyCounts HC
-  LEFT JOIN TotalTables TT ON true
-  WHERE HC.amount >= TT.chairs;
+    HAVING COUNT(S.date) >= ${MAX_CAPACITY};
 `
 
   // Aqui foi ajustado manualmente o fuso horário (-3 horas)

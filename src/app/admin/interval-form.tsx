@@ -12,9 +12,9 @@ import { convertTimeStringToMinutes } from '@/utils/convert-time-string-to-minut
 import { getWeekDays } from '@/utils/get-week-days'
 import { zodResolver } from '@hookform/resolvers/zod'
 import dayjs from 'dayjs'
-import { useState } from 'react'
-
+import { convertMinutesToTimeString } from '@/utils/convert-minutes-to-time-string'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 
 const timeIntervalsFormSchema = z.object({
@@ -57,15 +57,7 @@ const timeIntervalsFormSchema = z.object({
           'O horário de término deve ser pelo menos 1h distante do início.',
       },
     ),
-  lastDay: z
-    .string()
-    .min(1, { message: 'Preencha o último dia de funcionamento' })
-    .refine(
-      (date) => dayjs(date).isAfter(dayjs(new Date()).hour(23).minute(59)),
-      {
-        message: 'A data deve ser posterior ao dia de hoje.',
-      },
-    ),
+  lastDay: z.string().min(1, { message: 'Preencha o último dia de funcionamento' }),
   startDay: z.string().optional(),
 })
 
@@ -80,6 +72,7 @@ export function IntervalForm() {
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<
     TimeIntervalsFormInput,
@@ -93,62 +86,116 @@ export function IntervalForm() {
           weekDay: 0,
           enabled: false,
           startTime: '10:00',
-          endTime: '21:00',
-          startBlock: '14:00',
-          endBlock: '17:00',
+          endTime: '17:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 1,
           enabled: true,
           startTime: '10:00',
-          endTime: '21:00',
-          startBlock: '14:00',
-          endBlock: '17:00',
+          endTime: '17:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 2,
           enabled: true,
           startTime: '10:00',
-          endTime: '21:00',
-          startBlock: '14:00',
-          endBlock: '17:00',
+          endTime: '17:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 3,
           enabled: true,
           startTime: '10:00',
           endTime: '17:00',
-          startBlock: '18:00',
-          endBlock: '18:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 4,
           enabled: true,
           startTime: '10:00',
           endTime: '17:00',
-          startBlock: '18:00',
-          endBlock: '18:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 5,
-          enabled: false,
+          enabled: true,
           startTime: '10:00',
-          endTime: '21:00',
-          startBlock: '14:00',
-          endBlock: '17:00',
+          endTime: '17:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
         {
           weekDay: 6,
           enabled: false,
           startTime: '10:00',
-          endTime: '21:00',
-          startBlock: '14:00',
-          endBlock: '17:00',
+          endTime: '17:00',
+          startBlock: '12:00',
+          endBlock: '13:00',
         },
       ],
       startDay: dayjs(new Date()).format('YYYY-MM-DD'),
+      lastDay: dayjs(new Date()).add(1, 'month').format('YYYY-MM-DD'),
     },
   })
+
+  useEffect(() => {
+    async function loadAvailability() {
+      const response = await fetch('/api/v1/availability')
+      if (response.ok) {
+        const { availableSchedules } = await response.json()
+        if (availableSchedules && availableSchedules.length > 0) {
+          const intervals = [0, 1, 2, 3, 4, 5, 6].map((day) => {
+            const schedule = availableSchedules.find(
+              (s: any) => s.week_day === day,
+            )
+            if (schedule) {
+              return {
+                weekDay: day,
+                enabled: true,
+                startTime: convertMinutesToTimeString(
+                  schedule.time_start_in_minutes,
+                ),
+                endTime: convertMinutesToTimeString(
+                  schedule.time_end_in_minutes,
+                ),
+                startBlock: convertMinutesToTimeString(
+                  schedule.start_block_in_minutes,
+                ),
+                endBlock: convertMinutesToTimeString(
+                  schedule.end_block_in_minutes,
+                ),
+              }
+            }
+            return {
+              weekDay: day,
+              enabled: false,
+              startTime: '10:00',
+              endTime: '17:00',
+              startBlock: '12:00',
+              endBlock: '13:00',
+            }
+          })
+
+          reset({
+            intervals,
+            startDay: dayjs(availableSchedules[0].start_day).format(
+              'YYYY-MM-DD',
+            ),
+            lastDay: dayjs(availableSchedules[0].final_day).format(
+              'YYYY-MM-DD',
+            ),
+          })
+        }
+      }
+    }
+    loadAvailability()
+  }, [reset])
 
   const { fields } = useFieldArray({
     name: 'intervals',
@@ -163,8 +210,6 @@ export function IntervalForm() {
     const { intervals, lastDay, startDay } = data as TimeIntervalsFormOutput
 
     const body = JSON.stringify({ intervals, lastDay, startDay })
-
-    console.log(intervals)
 
     const response = await fetch('/api/v1/availability', {
       method: 'POST',

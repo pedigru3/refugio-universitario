@@ -38,11 +38,6 @@ export async function GET(request: Request, { params }: RouteParams) {
     select: {
       id: true,
       date: true,
-      table: {
-        select: {
-          table_name: true,
-        },
-      },
     },
     orderBy: {
       date: 'asc',
@@ -73,7 +68,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     return Response.json({ error: 'user not find' }, { status: 400 })
   }
 
-  if (userExists.id !== session?.user.id) {
+  if (session?.user.role !== 'admin' && userExists.id !== session?.user.id) {
     return Response.json({ error: 'unauthorized user' }, { status: 401 })
   }
 
@@ -87,69 +82,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const bory = await request.json()
     const {
       date,
-      table_id: incomingTableId,
-      spent_time_in_minutes: spentTimeInMinutes,
     } = BorySchema.parse(bory)
-
-    let tableId = incomingTableId
-
-    if (!tableId) {
-      // Automatic table selection
-      const referenceDate = dayjs(date).toDate()
-
-      const allTables = await prisma.table.findMany({
-        select: {
-          id: true,
-          chair_count: true,
-        },
-      })
-
-      const tablesWithSchedulings = await prisma.table.findMany({
-        where: {
-          schedulings: {
-            some: {
-              date: referenceDate,
-            },
-          },
-        },
-        include: {
-          schedulings: {
-            where: {
-              date: referenceDate,
-            },
-          },
-        },
-      })
-
-      const tablesWithSchedulingsMap = new Map(
-        tablesWithSchedulings.map((item) => [item.id, item]),
-      )
-
-      const availableTable = allTables.find((table) => {
-        const currentTable = tablesWithSchedulingsMap.get(table.id)
-        if (!currentTable) return true
-        return currentTable.schedulings.length < table.chair_count
-      })
-
-      if (!availableTable) {
-        return Response.json(
-          { error: 'No tables available at this time' },
-          { status: 400 },
-        )
-      }
-
-      tableId = availableTable.id
-    } else {
-      const table = await prisma.table.findUnique({
-        where: {
-          id: tableId,
-        },
-      })
-
-      if (!table) {
-        return Response.json({ error: 'invalid Table' }, { status: 400 })
-      }
-    }
 
     const schedulingDate = dayjs(date)
 
@@ -168,101 +101,13 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    const scheduling = await prisma.scheduling.create({
+    await prisma.scheduling.create({
       data: {
         date,
         user_id: userExists.id,
-        table_id: tableId,
-      },
-      include: {
-        table: true,
+        table_id: null as any,
       },
     })
-
-    // Criação das próximas horas
-
-    // 1. Descobrir quantas horas restam até o fim
-
-    const availableSchedule = await prisma.availableSchedule.findFirst({
-      where: {
-        week_day: dayjs(date).get('day'),
-      },
-    })
-
-    if (!availableSchedule) {
-      return Response.json(
-        { error: 'nenhum horário disponível' },
-        { status: 400 },
-      )
-    }
-
-    const timeStartInMinutes =
-      dayjs(scheduling.date).tz('America/Sao_Paulo').hour() * 60
-    let timeEndInMinutes = availableSchedule.time_end_in_minutes
-
-    // Descobrir quantas horas restam até o proximo horario ocupado
-
-    const nextAppointment = await prisma.scheduling.findFirst({
-      where: {
-        date: {
-          gt: scheduling.date,
-        },
-        AND: {
-          date: {
-            lt: dayjs
-              .utc(scheduling.date)
-              .endOf('date')
-              .tz('America/Sao_Paulo')
-              .toISOString(),
-          },
-        },
-      },
-      orderBy: {
-        date: 'asc',
-      },
-    })
-
-    if (nextAppointment) {
-      timeEndInMinutes = nextAppointment.date.getHours() * 60
-    }
-
-    // fazer um agendamento para cada próxima hora
-
-    const nextSchedules: {
-      date: string
-      user_id: string
-      table_id: string
-    }[] = []
-
-    // verificar se horário do usuário é valido
-
-    if (spentTimeInMinutes) {
-      const timeEndInMinutesSetByUser = timeStartInMinutes + spentTimeInMinutes
-
-      if (timeEndInMinutesSetByUser <= timeEndInMinutes) {
-        timeEndInMinutes = timeEndInMinutesSetByUser
-      }
-    }
-
-    const spendTimeInHours = (timeEndInMinutes - timeStartInMinutes) / 60
-
-    console.log('spendTimeInHours: ', spendTimeInHours)
-
-    for (let i = 0; i < spendTimeInHours - 1; i++) {
-      nextSchedules.push({
-        date: dayjs(date)
-          .add(i + 1, 'hour')
-          .toISOString(),
-        table_id: scheduling.table_id,
-        user_id: scheduling.user_id,
-      })
-    }
-
-    await prisma.scheduling.createMany({
-      data: nextSchedules,
-    })
-
-    // Fim da criação das proximas horas
 
     const calendar = google.calendar({
       version: 'v3',
@@ -273,12 +118,12 @@ export async function POST(request: Request, { params }: RouteParams) {
       calendarId: 'primary',
       requestBody: {
         summary: 'Estudar: Refúgio Universitário',
-        description: `Reserva de estudo na ${scheduling.table.table_name}.`,
+        description: `Reserva de estudo.`,
         start: {
           dateTime: schedulingDate.format(),
         },
         end: {
-          dateTime: schedulingDate.add(spendTimeInHours, 'hour').format(),
+          dateTime: schedulingDate.add(1, 'hour').format(),
         },
         attendees: [{ email: userExists.email, displayName: userExists.name }],
       },

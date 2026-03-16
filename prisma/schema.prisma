@@ -86,11 +86,11 @@ model Scheduling {
 
   spent_time_in_minutes Int @default(60)
 
-  table Table @relation(fields: [table_id], references: [id])
-  user  User  @relation(fields: [user_id], references: [id])
+  table Table? @relation(fields: [table_id], references: [id])
+  user  User   @relation(fields: [user_id], references: [id])
 
   user_id  String
-  table_id String
+  table_id String?
 
   @@index([user_id])
   @@map("schedulings")

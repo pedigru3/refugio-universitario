@@ -11,8 +11,9 @@ export default async function AdminPage() {
   return (
     <div className="pb-10">
       <Container>
-        <div className="grid gird-cols-1 lg:grid-cols-1 lg:gap-5 mt-10">
+        <div className="grid  lg:gap-5 mt-10">
           <SystemStatusToggle />
+          <IntervalForm />
         </div>
       </Container>
     </div>

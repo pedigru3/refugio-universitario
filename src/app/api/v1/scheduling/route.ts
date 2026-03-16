@@ -14,8 +14,7 @@ type GroupedScheduling = {
     user: string
     name: string
     course: string
-    table: string
-    hours: string[]
+    slots: { id: string; hour: string }[]
     checkIn?: string
     checkOut?: string
   }[]
@@ -38,6 +37,7 @@ export async function GET() {
       },
     },
     select: {
+      id: true,
       user: {
         select: {
           username: true,
@@ -47,11 +47,6 @@ export async function GET() {
       },
       check_in: true,
       check_out: true,
-      table: {
-        select: {
-          table_name: true,
-        },
-      },
       date: true,
     },
   })
@@ -74,10 +69,7 @@ export async function GET() {
             user: user.username,
             name: user.name,
             course: entry.user.course,
-            table: entry.table.table_name,
-            hours: [hour],
-            // check_in: entry.check_in?.toISOString(),
-            // chair_count: entry.check_in?.toISOString(),
+            slots: [{ id: entry.id, hour }],
           },
         ],
       })
@@ -87,14 +79,13 @@ export async function GET() {
         (item) => item.user === user.username,
       )
       if (existingEntry) {
-        existingEntry.hours.push(hour)
+        existingEntry.slots.push({ id: entry.id, hour })
       } else {
         existingDate?.schedules.push({
           user: user.username,
           name: user.name,
           course: entry.user.course,
-          table: entry.table.table_name,
-          hours: [hour],
+          slots: [{ id: entry.id, hour }],
         })
       }
     }
