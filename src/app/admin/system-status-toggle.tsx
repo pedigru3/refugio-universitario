@@ -41,13 +41,15 @@ type PendingAction = 'status' | 'capacity' | null
 type SystemStatusResponse = {
   isOpen: boolean
   capacityLevel: number
+  isManualClosed: boolean
 }
 
 function useSystemStatus() {
   const [state, setState] = useState<{
     isOpen: boolean | null
     capacityLevel: number
-  }>({ isOpen: null, capacityLevel: 0 })
+    isManualClosed: boolean
+  }>({ isOpen: null, capacityLevel: 0, isManualClosed: false })
   const [isLoading, setIsLoading] = useState(true)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -56,7 +58,11 @@ function useSystemStatus() {
     fetch('/api/v1/system/status')
       .then((res) => res.json())
       .then((data: SystemStatusResponse) => {
-        setState({ isOpen: data.isOpen, capacityLevel: data.capacityLevel })
+        setState({
+          isOpen: data.isOpen,
+          capacityLevel: data.capacityLevel,
+          isManualClosed: data.isManualClosed,
+        })
       })
       .catch((err) => {
         console.error('Failed to fetch status', err)
@@ -76,24 +82,13 @@ function useSystemStatus() {
         typeof partialState.isOpen === 'boolean'
           ? partialState.isOpen
           : previous.isOpen,
-      capacityLevel:
-        typeof partialState.capacityLevel === 'number'
-          ? partialState.capacityLevel
-          : previous.capacityLevel,
     }
 
-    if (!next.isOpen) {
-      next.capacityLevel = 0
-    }
-
-    if (
-      next.isOpen === previous.isOpen &&
-      next.capacityLevel === previous.capacityLevel
-    ) {
+    if (next.isOpen === previous.isOpen) {
       return
     }
 
-    setState(next)
+    setState((prev) => ({ ...prev, isOpen: next.isOpen }))
     setPendingAction(action)
     setErrorMessage(null)
 
@@ -103,7 +98,6 @@ function useSystemStatus() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           isOpen: next.isOpen,
-          capacityLevel: next.capacityLevel,
         }),
       })
 
@@ -114,7 +108,8 @@ function useSystemStatus() {
       const payload: SystemStatusResponse = await res.json()
       setState({
         isOpen: payload.isOpen,
-        capacityLevel: payload.capacityLevel,
+        capacityLevel: previous.capacityLevel, // Mantém a lotação atual calculada
+        isManualClosed: !payload.isOpen,
       })
     } catch (error) {
       console.error('Failed to sync status', error)
@@ -127,22 +122,16 @@ function useSystemStatus() {
 
   function toggleStatus() {
     if (state.isOpen === null) return
-    syncStatus({ isOpen: !state.isOpen }, 'status')
-  }
-
-  function updateCapacity(level: number) {
-    if (state.isOpen === null || !state.isOpen) return
-    syncStatus({ capacityLevel: level }, 'capacity')
+    syncStatus({ isOpen: state.isManualClosed }, 'status')
   }
 
   return {
     isOpen: state.isOpen,
     capacityLevel: state.capacityLevel,
+    isManualClosed: state.isManualClosed,
     isLoading,
     isToggling: pendingAction === 'status',
-    isUpdatingCapacity: pendingAction === 'capacity',
     toggleStatus,
-    updateCapacity,
     errorMessage,
   }
 }
@@ -163,11 +152,10 @@ export function SystemStatusToggle() {
   const {
     isOpen,
     capacityLevel,
+    isManualClosed,
     isLoading,
     isToggling,
-    isUpdatingCapacity,
     toggleStatus,
-    updateCapacity,
     errorMessage,
   } = useSystemStatus()
 
@@ -203,7 +191,7 @@ export function SystemStatusToggle() {
             <span
               className={`h-2 w-2 rounded-full ${theme.pulse} animate-pulse`}
             />
-            {isOpen ? 'Aberto agora' : 'Fechado para ajustes'}
+            {isOpen ? 'Aberto (Automático)' : isManualClosed ? 'Bloqueado Manualmente' : 'Fechado (Fora de Hora)'}
           </span>
         </header>
 
@@ -232,10 +220,10 @@ export function SystemStatusToggle() {
           <button
             onClick={toggleStatus}
             disabled={isToggling}
-            className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:cursor-not-allowed disabled:opacity-60 ${theme.action}`}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:cursor-not-allowed disabled:opacity-60 ${isManualClosed ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-red-600 hover:bg-red-500'} text-white`}
           >
             {isToggling && <CircleNotch size={18} className="animate-spin" />}
-            {isOpen ? 'Fechar Refúgio' : 'Abrir Refúgio'}
+            {isManualClosed ? 'Ativar Modo Automático' : 'Bloquear Acesso Agora'}
           </button>
         </div>
 
@@ -254,15 +242,12 @@ export function SystemStatusToggle() {
               {CAPACITY_LEVELS.map((level) => {
                 const isActive = isOpen && capacityLevel >= level
                 return (
-                  <button
+                  <div
                     key={level}
-                    type="button"
-                    onClick={() => updateCapacity(level)}
-                    disabled={!isOpen}
                     className={`rounded-xl border px-3 py-2 transition-all ${isActive
                       ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-200'
                       : 'border-white/10 text-zinc-400'
-                      } ${!isOpen ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      }`}
                   >
                     <span className="sr-only">{`Nível ${level}`}</span>
                     <div className="flex items-center gap-1">
@@ -275,24 +260,15 @@ export function SystemStatusToggle() {
                         />
                       ))}
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
           </div>
 
-          {!isOpen && (
-            <p className="mt-3 text-sm text-amber-200/80">
-              Abra o refúgio para definir a nova lotação.
-            </p>
-          )}
-
-          {isOpen && isUpdatingCapacity && (
-            <p className="mt-3 flex items-center gap-2 text-sm text-emerald-200">
-              <CircleNotch size={16} className="animate-spin" />
-              Atualizando lotação...
-            </p>
-          )}
+          <p className="mt-3 text-sm text-zinc-300">
+            A lotação é calculada automaticamente com base nos agendamentos ativos na hora atual.
+          </p>
         </div>
 
         {errorMessage && (
@@ -303,8 +279,8 @@ export function SystemStatusToggle() {
 
         <div className="text-zinc-200/80">
           <FormAnnotation>
-            Esta ação controla o aviso principal do site e deve representar a
-            disponibilidade real do espaço.
+            O status é atualizado sozinho com base no seu horário de funcionamento. 
+            Use o botão acima apenas para bloqueios manuais de emergência.
           </FormAnnotation>
         </div>
       </div>

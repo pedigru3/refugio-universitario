@@ -17,8 +17,8 @@ export async function getGoogleOAuthToken(userId: string) {
   )
 
   const expiryDate = account.access_token_expires
-    ? new Date().getTime() - new Date(account.access_token_expires).getTime()
-    : 1000 * 60 * 60
+    ? new Date(account.access_token_expires).getTime()
+    : null
 
   auth.setCredentials({
     access_token: account.access_token,
@@ -26,11 +26,11 @@ export async function getGoogleOAuthToken(userId: string) {
     expiry_date: expiryDate,
   })
 
-  if (!account.access_token_expires) {
+  if (!expiryDate) {
     return auth
   }
 
-  const isTokenExpired = dayjs(expiryDate).isAfter(new Date())
+  const isTokenExpired = dayjs(expiryDate).isBefore(dayjs().add(1, 'minute'))
 
   if (isTokenExpired) {
     const { credentials } = await auth.refreshAccessToken()

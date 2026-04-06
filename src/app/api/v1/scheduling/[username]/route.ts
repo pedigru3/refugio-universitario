@@ -122,25 +122,31 @@ export async function POST(request: Request, { params }: RouteParams) {
       }),
     ])
 
-    const calendar = google.calendar({
-      version: 'v3',
-      auth: await getGoogleOAuthToken(userExists.id),
-    })
+    // Integrações externas não podem bloquear o sucesso do agendamento principal
+    try {
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: await getGoogleOAuthToken(userExists.id),
+      })
 
-    await calendar.events.insert({
-      calendarId: 'primary',
-      requestBody: {
-        summary: 'Estudar: Refúgio Universitário',
-        description: `Reserva de estudo.`,
-        start: {
-          dateTime: schedulingDate.format(),
+      await calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: {
+          summary: 'Estudar: Refúgio Universitário',
+          description: `Reserva de estudo.`,
+          start: {
+            dateTime: schedulingDate.format(),
+          },
+          end: {
+            dateTime: schedulingDate.add(spent_time_in_minutes || 60, 'minute').format(),
+          },
+          attendees: [{ email: userExists.email, displayName: userExists.name }],
         },
-        end: {
-          dateTime: schedulingDate.add(spent_time_in_minutes || 60, 'minute').format(),
-        },
-        attendees: [{ email: userExists.email, displayName: userExists.name }],
-      },
-    })
+      })
+    } catch (calendarError) {
+      console.error('Erro ao inserir evento no Google Calendar:', calendarError)
+      // O usuário não deve ver erro se a agenda falhar, pois a reserva no banco foi feita
+    }
 
     // Enviar e-mail de notificação para o administrador (apenas se for usuário comum)
     if (session?.user.role !== 'admin') {
