@@ -1,6 +1,6 @@
 'use client'
 
-import { Trash, PencilSimple } from '@phosphor-icons/react'
+import { Trash, PencilSimple, CheckCircle, Circle } from '@phosphor-icons/react'
 import { Container } from '@/components/container'
 import { Title } from '@/components/title'
 import { useEffect, useState } from 'react'
@@ -10,7 +10,7 @@ interface Schedule {
   user: string
   name: string
   course: string
-  slots: { id: string; hour: string }[]
+  slots: { id: string; hour: string; checkIn: string | null }[]
 }
 
 interface GroupedScheduling {
@@ -55,6 +55,15 @@ export default function Schedules() {
       await fetch(`/api/v1/scheduling/${username}/${id}`, {
         method: 'DELETE',
       })
+      getSchedules()
+    }
+  }
+
+  async function handleCheckIn(username: string, id: string) {
+    const response = await fetch(`/api/v1/scheduling/${username}/${id}/check-in`, {
+      method: 'PATCH',
+    })
+    if (response.ok) {
       getSchedules()
     }
   }
@@ -117,23 +126,53 @@ export default function Schedules() {
                           </div>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {schedule.slots.map((slot) => {
+                              const isCheckedIn = !!slot.checkIn
+
                               return (
-                                <div key={slot.id} className="flex items-center gap-2 bg-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-200">
-                                   <span className="font-medium">{slot.hour}h</span>
+                                <div 
+                                  key={slot.id} 
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition duration-200 ${
+                                    isCheckedIn 
+                                      ? 'bg-emerald-50 border-emerald-200' 
+                                      : 'bg-zinc-50 border-zinc-200'
+                                  }`}
+                                >
+                                   <span className={`font-bold ${isCheckedIn ? 'text-emerald-700' : 'text-zinc-900'}`}>
+                                    {slot.hour}h
+                                   </span>
+                                   
+                                   <div className="h-4 w-[1px] bg-zinc-300 mx-1" />
+
+                                   <button
+                                     onClick={() => handleCheckIn(schedule.user, slot.id)}
+                                     className={`p-0.5 rounded-full transition ${
+                                       isCheckedIn 
+                                         ? 'text-emerald-600 hover:bg-emerald-100' 
+                                         : 'text-zinc-400 hover:bg-zinc-200'
+                                     }`}
+                                     title={isCheckedIn ? 'Desmarcar Presença' : 'Marcar Presença'}
+                                   >
+                                     {isCheckedIn ? (
+                                       <CheckCircle size={20} weight="fill" />
+                                     ) : (
+                                       <Circle size={20} />
+                                     )}
+                                   </button>
+
                                    <button
                                      onClick={() => window.location.href = `/agendamento?username=${schedule.user}&edit=${slot.id}`}
                                      className="text-purple-500 hover:text-purple-700 p-0.5 hover:bg-purple-50 rounded transition"
                                      title="Editar"
-                                   >
-                                     <PencilSimple size={16} />
-                                   </button>
-                                   <button
-                                     onClick={() => handleDeleteAppointment(schedule.user, slot.id)}
-                                     className="text-red-500 hover:text-red-700 p-0.5 hover:bg-red-50 rounded transition"
-                                     title="Excluir"
-                                   >
-                                     <Trash size={16} />
-                                   </button>
+                                    >
+                                      <PencilSimple size={18} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteAppointment(schedule.user, slot.id)}
+                                      className="text-red-500 hover:text-red-700 p-0.5 hover:bg-red-50 rounded transition"
+                                      title="Excluir"
+                                    >
+                                      <Trash size={18} />
+                                    </button>
                                 </div>
                               )
                             })}

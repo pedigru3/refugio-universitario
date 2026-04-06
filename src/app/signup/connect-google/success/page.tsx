@@ -33,10 +33,10 @@ export default function SuccessSignUp() {
           isLoading={isLoading}
           onClick={() => {
             setIsLoading(true)
-            router.push('/profile')
+            router.push('/agendamento')
           }}
         >
-          Ver perfil
+          Agendar
         </Button>
       </div>
     )

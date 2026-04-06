@@ -85,6 +85,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const bory = await request.json()
     const {
       date,
+      spent_time_in_minutes,
     } = BorySchema.parse(bory)
 
     const schedulingDate = dayjs(date)
@@ -110,6 +111,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           date,
           user_id: userExists.id,
           table_id: null as any,
+          spent_time_in_minutes: spent_time_in_minutes || 60,
         },
       }),
       prisma.user.update({
@@ -134,7 +136,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           dateTime: schedulingDate.format(),
         },
         end: {
-          dateTime: schedulingDate.add(1, 'hour').format(),
+          dateTime: schedulingDate.add(spent_time_in_minutes || 60, 'minute').format(),
         },
         attendees: [{ email: userExists.email, displayName: userExists.name }],
       },
@@ -155,7 +157,7 @@ export async function POST(request: Request, { params }: RouteParams) {
               <ul style="list-style: none; padding: 0;">
                 <li><strong>Estudante:</strong> ${userExists.name}</li>
                 <li><strong>E-mail:</strong> ${userExists.email}</li>
-                <li><strong>Data/Hora:</strong> ${dayjs.utc(date).tz('America/Sao_Paulo').format('DD/MM/YYYY [às] HH:mm')}</li>
+                <li><strong>Data/Hora:</strong> ${dayjs.utc(date).tz('America/Sao_Paulo').format('DD/MM/YYYY [das] HH:mm')} às ${dayjs.utc(date).add(spent_time_in_minutes || 60, 'minute').tz('America/Sao_Paulo').format('HH:mm')}</li>
               </ul>
               <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
               <p style="font-size: 12px; color: #777;">Este é um e-mail automático do sistema Refúgio Universitário.</p>

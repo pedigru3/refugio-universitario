@@ -34,8 +34,11 @@ export default function Agendamento() {
     availability,
     selectedDate,
     weekDay,
-    hour,
+    startHour,
+    endHour,
+    availableEndTimes,
     handleSelectTime,
+    handleSelectEndTime,
     handleSelectedDate,
     isLoading,
   } = useSchedule()
@@ -48,17 +51,14 @@ export default function Agendamento() {
 
   async function handleSendingForm() {
     setIsSending(true)
-    if (!selectedDate || hour.current === undefined) {
-      return setIsSending(false)
-    }
-
     const setTime = dayjs(selectedDate)
-      .set('hour', hour.current)
+      .set('hour', startHour!)
       .startOf('hour')
       .format()
 
     const body = {
       date: setTime,
+      spent_time_in_minutes: (endHour! - startHour!) * 60,
     }
 
     const url = editId 
@@ -102,18 +102,34 @@ export default function Agendamento() {
           onDateSelected={handleSelectedDate}
         />
         {isDateSelected && (
-          <TimePickerComponent
-            availabilityTimes={availability}
-            currentHour={hour.current ?? null}
-            describeDate={describeDate}
-            handleSelectTime={handleSelectTime}
-            isLoading={isLoading}
-            weekDay={weekDay}
-          />
+          <div className="flex flex-col gap-4 p-4 overflow-y-auto max-h-[440px] scrollbar-thin scrollbar-thumb-zinc-600">
+            <TimePickerComponent
+              availabilityTimes={availability}
+              currentHour={startHour ?? null}
+              describeDate="Horário de chegada"
+              handleSelectTime={handleSelectTime}
+              isLoading={isLoading}
+              weekDay={weekDay}
+            />
+
+            {startHour !== undefined && (
+              <TimePickerComponent
+                availabilityTimes={{
+                  possibleTimes: availableEndTimes,
+                  availableTimes: availableEndTimes,
+                }}
+                currentHour={endHour ?? null}
+                describeDate="Horário de saída"
+                handleSelectTime={handleSelectEndTime}
+                isLoading={isLoading}
+                weekDay={weekDay}
+              />
+            )}
+          </div>
         )}
       </div>
 
-      {hour.current !== undefined && (
+      {startHour !== undefined && endHour !== undefined && (
         <div className="mt-6 bg-zinc-800 border border-zinc-700 p-6 rounded-md max-w-[540px] lg:max-w-[820px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-5">
             <div className="items-center self-center text-white">
@@ -130,7 +146,7 @@ export default function Agendamento() {
                 <p className="font-bold">
                   Data: {dayjs(selectedDate).format('dddd, DD/MM/YYYY')}
                 </p>
-                <p className="font-bold">Horário: {hour.current} horas</p>
+                <p className="font-bold">Horário: das {startHour}:00 às {endHour}:00</p>
               </div>
             </div>
             <div className="flex justify-end">

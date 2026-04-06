@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 
 export interface Availability {
@@ -19,7 +19,8 @@ export function useSchedule() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const weekDay = selectedDate ? dayjs(selectedDate).format('dddd') : null
 
-  const hour = useRef<number | undefined>(undefined)
+  const [startHour, setStartHour] = useState<number | undefined>(undefined)
+  const [endHour, setEndHour] = useState<number | undefined>(undefined)
 
   // tables
 
@@ -47,17 +48,42 @@ export function useSchedule() {
 
   const availabilityTimes = availability?.availableTimes
 
+  // Calcula os horários de saída disponíveis com base no horário de entrada
+  const availableEndTimes = useMemo(() => {
+    if (startHour === undefined || !availabilityTimes) return []
+    
+    const ends = []
+    let current = startHour
+    
+    // O primeiro horário de saída possível é startHour + 1
+    // Continuamos enquanto o próximo slot estiver disponível
+    while (availabilityTimes.includes(current)) {
+      ends.push(current + 1)
+      current++
+      // Se o próximo slot não estiver nos horários possíveis, paramos
+      if (!availability?.possibleTimes.includes(current)) break
+    }
+    
+    return ends
+  }, [startHour, availabilityTimes, availability?.possibleTimes])
+
   async function handleSelectedDate(date: Date) {
     setSelectedDate(date)
     setAvailabilityTables(null)
     setTableId('')
-    hour.current = undefined
+    setStartHour(undefined)
+    setEndHour(undefined)
   }
 
   async function handleSelectTime(time: number) {
-    hour.current = time
+    setStartHour(time)
+    setEndHour(undefined)
     // Force re-render to show the confirmation section
     setTableId(String(time))
+  }
+
+  async function handleSelectEndTime(time: number) {
+    setEndHour(time)
   }
 
   function handleSelectTable(isTableSelected: boolean, tableId: string) {
@@ -68,11 +94,14 @@ export function useSchedule() {
     availability,
     availabilityTables,
     selectedDate,
-    hour,
+    startHour,
+    endHour,
+    availableEndTimes,
     weekDay,
     tableId,
     handleSelectedDate,
     handleSelectTime,
+    handleSelectEndTime,
     handleSelectTable,
     isLoading,
   }

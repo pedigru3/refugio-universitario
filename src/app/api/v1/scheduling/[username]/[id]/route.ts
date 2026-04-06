@@ -33,11 +33,19 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return Response.json({}, { status: 401 })
   }
 
-  const { date } = z.object({ date: z.string() }).parse(await request.json())
+  const { date, spent_time_in_minutes } = z
+    .object({
+      date: z.string().optional(),
+      spent_time_in_minutes: z.number().optional(),
+    })
+    .parse(await request.json())
 
   await prisma.scheduling.update({
     where: { id },
-    data: { date: new Date(date) },
+    data: {
+      ...(date ? { date: new Date(date) } : {}),
+      ...(spent_time_in_minutes ? { spent_time_in_minutes } : {}),
+    },
   })
 
   return Response.json({})
