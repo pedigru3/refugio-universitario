@@ -155,7 +155,7 @@ export async function POST(request: Request, { params }: RouteParams) {
               <ul style="list-style: none; padding: 0;">
                 <li><strong>Estudante:</strong> ${userExists.name}</li>
                 <li><strong>E-mail:</strong> ${userExists.email}</li>
-                <li><strong>Data/Hora:</strong> ${schedulingDate.format('DD/MM/YYYY [às] HH:mm')}</li>
+                <li><strong>Data/Hora:</strong> ${dayjs.utc(date).tz('America/Sao_Paulo').format('DD/MM/YYYY [às] HH:mm')}</li>
               </ul>
               <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
               <p style="font-size: 12px; color: #777;">Este é um e-mail automático do sistema Refúgio Universitário.</p>

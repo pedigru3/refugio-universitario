@@ -5,3 +5,5 @@ import 'dayjs/locale/pt-br'
 
 dayjs.locale('pt-br')
 dayjs.extend(dayjsUtc)
+
+export default dayjs

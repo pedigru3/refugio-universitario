@@ -16,7 +16,7 @@ import {
 } from '@phosphor-icons/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import dayjs from 'dayjs'
+import dayjs from '@/lib/dayjs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -138,7 +138,7 @@ export default function Profile() {
               course: session.user.course,
               education_level: session.user.education_level,
               cellphone: session.user.cellphone || '',
-              birthday: session.user.birthday ? dayjs(session.user.birthday).format('YYYY-MM-DD') : '',
+              birthday: session.user.birthday ? dayjs.utc(session.user.birthday).format('YYYY-MM-DD') : '',
           })
       }
   }, [session, reset])
@@ -358,7 +358,7 @@ export default function Profile() {
                 ) : (
                     <p className="mt-1 text-lg font-medium text-white">
                         {user?.birthday
-                            ? dayjs(user.birthday).format('DD/MM/YYYY')
+                            ? dayjs.utc(user.birthday).format('DD/MM/YYYY')
                             : 'Não informado'}
                     </p>
                 )}
