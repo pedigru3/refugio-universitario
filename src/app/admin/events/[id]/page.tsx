@@ -5,7 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import dayjs from 'dayjs'
+import dayjs from '@/lib/dayjs'
 
 export default async function AdminEventDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -56,7 +56,7 @@ export default async function AdminEventDetailsPage({ params }: { params: Promis
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
              <div className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-purple-600 text-black">
                 <h3 className="text-xl font-bold mb-4">Informações</h3>
-                <p><strong>Data:</strong> {dayjs(event.date).format('DD/MM/YYYY HH:mm')}</p>
+                <p><strong>Data:</strong> {dayjs.utc(event.date).format('DD/MM/YYYY HH:mm')}</p>
                 <p className="mt-2"><strong>Capacidade:</strong> {event.max_capacity} vagas</p>
                 <p className="mt-2"><strong>Ocupadas:</strong> {event.registrations.length} vagas</p>
                 <div className="mt-4 pt-4 border-t">

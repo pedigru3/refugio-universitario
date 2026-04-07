@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/button'
 import Link from 'next/link'
-import dayjs from 'dayjs'
+import dayjs from '@/lib/dayjs'
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -42,7 +42,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
       throw new Error('Preencha os campos obrigatórios')
     }
 
-    const date = new Date(dateStr)
+    const date = dayjs.utc(dateStr).toDate()
 
     await prisma.event.update({
       where: { id },
@@ -59,7 +59,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
   }
 
   // Formatting date for datetime-local
-  const dateForInput = dayjs(event.date).format('YYYY-MM-DDTHH:mm')
+  const dateForInput = dayjs.utc(event.date).format('YYYY-MM-DDTHH:mm')
 
   return (
     <div className="mt-10 mb-20">

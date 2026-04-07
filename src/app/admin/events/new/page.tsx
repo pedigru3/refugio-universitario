@@ -5,6 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/button'
+import dayjs from '@/lib/dayjs'
 
 async function createEvent(formData: FormData) {
   'use server'
@@ -19,7 +20,7 @@ async function createEvent(formData: FormData) {
     throw new Error('Preencha os campos obrigatórios')
   }
 
-  const date = new Date(dateStr)
+  const date = dayjs.utc(dateStr).toDate()
 
   await prisma.event.create({
     data: {

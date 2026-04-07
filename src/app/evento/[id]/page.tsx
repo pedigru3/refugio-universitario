@@ -1,252 +1,118 @@
-'use client'
+import { prisma } from '@/lib/prisma'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import EventContent from './event-content'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
-import { Container } from '@/components/container'
-import { Header } from '@/components/header'
-import { useSession } from 'next-auth/react'
-import { CalendarBlank, Clock } from '@phosphor-icons/react'
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EventPage() {
-  const { id } = useParams()
-  const router = useRouter()
-  const { data: session, status } = useSession()
-
-  const [eventData, setEventData] = useState<any>(null)
-  const [userData, setUserData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [registering, setRegistering] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function fetchEvent() {
-      try {
-        const res = await fetch(`/api/events/${id}`)
-        if (!res.ok) {
-          if (res.status === 404) {
-             setError('Evento não encontrado.')
-          }
-          setLoading(false)
-          return
-        }
-        const data = await res.json()
-        setEventData(data.event)
-        setUserData(data.user)
-      } catch (err) {
-        console.error(err)
-        setError('Erro ao carregar o evento.')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchEvent()
-  }, [id])
-
-  const handleRegister = async () => {
-    setRegistering(true)
-    setError(null)
-    setSuccess(null)
-    try {
-      const res = await fetch(`/api/events/${id}/register`, {
-        method: 'POST',
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        if (data.code === 'MISSING_CELLPHONE') {
-           setError('missing_cellphone')
-        } else {
-           setError(data.error || 'Erro ao confirmar presença.')
-        }
-      } else {
-        setSuccess('Presença confirmada com sucesso!')
-        setUserData({ ...userData, isRegistered: true })
-        setEventData({ ...eventData })
-      }
-    } catch (err) {
-      console.error(err)
-      setError('Erro de conexão ao confirmar presença.')
-    } finally {
-      setRegistering(false)
-    }
-  }
-
-  if (loading || status === 'loading') {
-    return (
-      <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end min-h-screen">
-        <Header />
-        <Container>
-          <div className="flex justify-center py-20 text-white text-xl">Carregando informações...</div>
-        </Container>
-      </div>
-    )
-  }
-
-  if (!eventData) {
-    return (
-      <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end min-h-screen">
-        <Header />
-        <Container>
-          <div className="text-center py-20 bg-white/10 mt-10 rounded-2xl backdrop-blur-sm border border-white/20">
-            <h2 className="text-2xl font-bold text-white">{error || 'Evento não encontrado.'}</h2>
-            <div className="mt-8">
-              <Link href="/" className="inline-block rounded-full bg-yellow-400 py-3 px-8 text-lg font-bold text-black hover:bg-yellow-300 transition-colors">Voltar ao início</Link>
-            </div>
-          </div>
-        </Container>
-      </div>
-    )
-  }
-
-  const dateObj = new Date(eventData.date)
-  const dayOfMonth = dateObj.getDate()
-  const monthName = dateObj.toLocaleString('pt-BR', { month: 'long' })
-  const capMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1)
-  const line1 = `${dayOfMonth} de ${capMonthName}`
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
   
-  const weekday = dateObj.toLocaleString('pt-BR', { weekday: 'long' }).split('-')[0]
-  const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1)
-  const time = dateObj.toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h')
-  const line2 = `${capWeekday} às ${time}`
+  const event = await prisma.event.findUnique({
+    where: { id }
+  })
+
+  if (!event) {
+    return {
+      title: 'Evento não encontrado | Refúgio Universitário',
+    }
+  }
+
+  return {
+    title: `${event.title} | Refúgio Universitário`,
+    description: event.description?.substring(0, 160) || 'Participe do nosso próximo evento no Refúgio Universitário.',
+    openGraph: {
+      title: event.title,
+      description: event.description || 'Lugar de acolhimento e uma possiblidade de família',
+      images: event.image_url ? [event.image_url] : ['/refugio-universitario.png'],
+      type: 'website',
+    },
+  }
+}
+
+export default async function EventPage({ params }: PageProps) {
+  const { id } = await params
+  const session = await getServerSession(authOptions)
+
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      registrations: {
+        select: {
+          user_id: true,
+        }
+      }
+    }
+  })
+
+  if (!event) {
+    notFound()
+  }
+
+  const registrationsCount = event.registrations.length
+  const isFull = registrationsCount >= event.max_capacity
+  
+  const isRegistered = session?.user ? event.registrations.some(
+    (reg) => reg.user_id === session.user.id
+  ) : false
+
+  const eventData = {
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    date: event.date.toISOString(),
+    imageUrl: event.image_url,
+    maxCapacity: event.max_capacity,
+    isFull,
+  }
+
+  const userData = {
+    isRegistered,
+    hasCellphone: session?.user ? !!session.user.cellphone : false
+  }
+
+  // JSON-LD for Event Schema
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    startDate: event.date.toISOString(),
+    description: event.description,
+    image: event.image_url || 'https://refugiouniversitario.com.br/refugio-universitario.png',
+    location: {
+      '@type': 'Place',
+      name: 'Refúgio Universitário',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'R. Rubéns Ávila, 150',
+        addressLocality: 'Londrina',
+        addressRegion: 'PR',
+        postalCode: '86051-400',
+        addressCountry: 'BR'
+      }
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: 'Refúgio Universitário',
+      url: 'https://refugiouniversitario.com.br'
+    }
+  }
 
   return (
     <>
-      <div className="bg-gradient-to-tr from-gradient-start via-gradient-middle via-60% to-gradient-end min-h-[400px] w-full">
-        <Header />
-        <Container>
-          <div className="pt-10 pb-20">
-            <h1 className="font-plus-jakarta-sans font-semibold text-3xl md:text-[4rem] leading-[1.2] text-white py-3 text-center">
-              {eventData.title}
-            </h1>
-            <p className="text-center text-white/80 text-lg mt-4 max-w-2xl mx-auto">
-              Participe do nosso próximo evento no Refúgio Universitário.
-            </p>
-          </div>
-        </Container>
-      </div>
-      
-      <main className="bg-zinc-50 min-h-[500px]">
-        <Container>
-          <div className="max-w-2xl mx-auto -mt-16 pb-20">
-            <div className="bg-white p-8 md:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative z-10 border border-zinc-100">
-              
-              <div className="text-zinc-700 text-lg leading-relaxed">
-                {eventData.imageUrl && (
-                  <div className="mb-8 overflow-hidden rounded-2xl shadow-sm border border-zinc-100 relative">
-                    <img src={eventData.imageUrl} alt={eventData.title} className="w-full object-cover max-h-[400px]" />
-                    <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-md bg-white/95 backdrop-blur-md px-5 py-4 rounded-2xl shadow-lg border border-white/20">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-3">
-                          <CalendarBlank size={20} weight="bold" className="text-purple-600" />
-                          <p className="font-bold text-lg leading-tight text-zinc-900">{line1}</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Clock size={20} weight="bold" className="text-purple-600" />
-                          <p className="text-sm font-medium text-zinc-500">{line2}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {eventData.description && (
-                  <p className="mb-6 whitespace-pre-wrap">{eventData.description}</p>
-                )}
-                
-                {!eventData.imageUrl && (
-                  <div className="bg-white px-6 py-5 rounded-2xl shadow-sm border border-zinc-100 mb-8 max-w-sm">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-3">
-                        <CalendarBlank size={22} weight="bold" className="text-purple-600" />
-                        <p className="font-bold text-xl leading-tight text-zinc-900">{line1}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Clock size={20} weight="bold" className="text-purple-600" />
-                        <p className="text-base font-medium text-zinc-500">{line2}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-zinc-100">
-                {userData?.isRegistered ? (
-                   <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-emerald-800 text-center font-medium flex flex-col items-center">
-                     <span className="text-4xl mb-3">✅</span>
-                     <p className="text-lg font-bold">Você já confirmou presença!</p>
-                     <p className="text-sm mt-1 opacity-80">Nos vemos no evento.</p>
-                   </div>
-                ) : eventData.isFull ? (
-                   <div className="bg-zinc-100 border border-zinc-200 p-6 rounded-2xl flex flex-col items-center text-center">
-                     <p className="mb-2 text-zinc-600 font-bold text-lg">As vagas estão esgotadas!</p>
-                     <p className="text-zinc-500 text-sm">A capacidade máxima para este evento já foi atingida.</p>
-                   </div>
-                ) : !session ? (
-                   <div className="bg-yellow-50 p-6 border border-yellow-200 rounded-2xl flex flex-col items-center text-center">
-                     <p className="mb-4 text-yellow-800 font-medium text-lg">Para confirmar sua presença, faça login na sua conta.</p>
-                     <Link href="/signup" className="px-8 py-3 bg-zinc-900 text-white rounded-full font-bold hover:bg-zinc-800 transition-colors shadow-lg">
-                       Fazer Login
-                     </Link>
-                   </div>
-                ) : (
-                   <div className="flex flex-col items-center gap-4">
-                     {error === 'missing_cellphone' ? (
-                       <div className="bg-red-50 p-6 border border-red-200 rounded-2xl w-full text-center">
-                         <h3 className="font-bold text-red-700 text-lg mb-2">Completar Perfil</h3>
-                         <p className="text-red-700 mb-4">
-                           Para confirmar presença, precisamos que informe seu número de celular no perfil (em caso de avisos ou sorteios).
-                         </p>
-                         <Link href="/profile" className="inline-block px-8 py-3 bg-zinc-900 text-white font-bold rounded-full hover:bg-zinc-800 transition-colors">
-                           Atualizar Meu Perfil
-                         </Link>
-                       </div>
-                     ) : error ? (
-                       <div className="bg-red-50 text-red-700 border border-red-200 p-4 rounded-xl w-full text-center font-medium">
-                         {error}
-                       </div>
-                     ) : null}
-
-                     {success ? (
-                       <div className="bg-emerald-50 text-emerald-700 border border-emerald-200 p-4 rounded-xl w-full text-center font-bold">
-                         {success}
-                       </div>
-                     ) : null}
-
-                     {!success && (
-                       <button
-                         onClick={handleRegister}
-                         disabled={registering}
-                         className="w-full py-4 rounded-full font-bold text-black text-lg transition-all shadow-md bg-yellow-400 hover:bg-yellow-300 hover:scale-[1.02]"
-                       >
-                         {registering ? 'Confirmando...' : 'Quero Participar!'}
-                       </button>
-                     )}
-                   </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="mt-8 text-center">
-               <Link href="/" className="text-zinc-500 hover:text-zinc-800 font-medium hover:underline">
-                 &larr; Voltar para a página inicial
-               </Link>
-            </div>
-          </div>
-        </Container>
-      </main>
-      
-      <footer className="bg-white text-zinc-600 justify-center text-center p-6 text-sm border-t border-zinc-100">
-        Confira nossa{' '}
-        <Link className="underline hover:text-black" href={'/privacy-policy'}>
-          Política de Privacidade
-        </Link>{' '}
-        e{' '}
-        <Link className="underline hover:text-black" href={'/privacy-policy/term'}>
-          Termos de Uso
-        </Link>
-      </footer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <EventContent 
+        id={id} 
+        initialEventData={eventData} 
+        initialUserData={userData} 
+      />
     </>
   )
 }

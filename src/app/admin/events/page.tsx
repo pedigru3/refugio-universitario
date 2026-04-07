@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Button } from '@/components/button'
-import dayjs from 'dayjs'
+import dayjs from '@/lib/dayjs'
 
 export default async function AdminEventsPage() {
   const session = await getServerSession(authOptions)
@@ -64,7 +64,7 @@ export default async function AdminEventsPage() {
                       {event.title}
                     </td>
                     <td className="px-6 py-4">
-                      {dayjs(event.date).format('DD/MM/YYYY HH:mm')}
+                      {dayjs.utc(event.date).format('DD/MM/YYYY HH:mm')}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
