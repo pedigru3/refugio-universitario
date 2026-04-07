@@ -26,6 +26,9 @@ export function MenuAdmin() {
       <li>
         <Link href={'/admin/blocked-days'}>Datas Bloqueadas</Link>
       </li>
+      <li>
+        <Link href={'/admin/events'}>Eventos</Link>
+      </li>
     </ul>
   )
 }

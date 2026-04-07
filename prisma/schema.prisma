@@ -26,7 +26,9 @@ model User {
   accounts   Account[]
   sessions   Session[]
   Scheduling Scheduling[]
-  decks      Deck[]
+  decks               Deck[]
+  event_registrations EventRegistration[]
+
 
   @@map("users")
 }
@@ -153,4 +155,32 @@ model Flashcard {
   deck Deck @relation(fields: [deck_id], references: [id], onDelete: Cascade)
 
   @@map("flashcards")
+}
+
+model Event {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  image_url    String?
+  date         DateTime
+  max_capacity Int      @default(20)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model EventRegistration {
+  id         String   @id @default(uuid())
+  event_id   String
+  user_id    String
+  created_at DateTime @default(now())
+
+  event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([event_id, user_id])
+  @@map("event_registrations")
 }

@@ -106,7 +106,8 @@ function MyDecks() {
 }
 
 import { MyAppointments } from './my-appointments'
-import { Calendar, PencilSimple, X } from '@phosphor-icons/react'
+import { MyEvents } from './my-events'
+import { Calendar, PencilSimple, X, Ticket } from '@phosphor-icons/react'
 
 const editProfileSchema = z.object({
     name: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
@@ -379,6 +380,17 @@ export default function Profile() {
             </div>
         )}
         </form>
+
+        {/* Meus Eventos */}
+        <div className="mb-10 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="rounded-xl border border-orange-400/30 bg-orange-500/10 p-3">
+              <Ticket size={24} weight="bold" className="text-orange-200" />
+            </div>
+            <h2 className="text-lg font-semibold">Minhas Inscrições em Eventos</h2>
+          </div>
+          <MyEvents />
+        </div>
 
         {/* Meus Agendamentos */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
