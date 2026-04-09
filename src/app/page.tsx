@@ -7,9 +7,32 @@ import { BulletIcon } from '@/components/bullet-icon'
 import { Title } from '@/components/title'
 import { StatusSection } from '@/components/status-section'
 import { authOptions } from './api/auth/[...nextauth]/options'
+import { prisma } from '@/lib/prisma'
+import { EventCard } from '@/components/event-card'
+import dayjs from '@/lib/dayjs'
+
+export const revalidate = 0 // Força a página a sempre buscar dados novos do banco
+export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
+
+  const upcomingEvents = await prisma.event.findMany({
+    where: {
+      date: {
+        gte: dayjs().startOf('day').toDate(),
+      },
+    },
+    orderBy: {
+      date: 'asc',
+    },
+    take: 3,
+  })
+
+  console.log('DEBUG: Eventos encontrados no banco:', upcomingEvents.length)
+  if (upcomingEvents.length > 0) {
+    console.log('DEBUG: Primeiro evento:', upcomingEvents[0].title, 'Data:', upcomingEvents[0].date)
+  }
 
   return (
     <>
@@ -61,6 +84,27 @@ export default async function Home() {
         <div className="pb-10" />
       </div>
       <main className="bg-white">
+        {upcomingEvents.length > 0 && (
+          <div className="py-16 bg-zinc-50/50 border-b border-zinc-100">
+            <Container>
+              <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div className="max-w-xl">
+                  <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">Próximos Eventos</h2>
+                  <p className="text-zinc-600 text-lg">
+                    Além de um espaço de estudos, o Refúgio Universitário promove momentos de integração e lazer. Confira o que vem por aí!
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {upcomingEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            </Container>
+          </div>
+        )}
+
         <Container>
           <div className="md:grid md:grid-cols-3 gap-10">
             <BulletIcon
