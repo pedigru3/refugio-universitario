@@ -29,6 +29,9 @@ export function MenuAdmin() {
       <li>
         <Link href={'/admin/events'}>Eventos</Link>
       </li>
+      <li>
+        <Link href={'/admin/campaigns'}>Campanhas</Link>
+      </li>
     </ul>
   )
 }

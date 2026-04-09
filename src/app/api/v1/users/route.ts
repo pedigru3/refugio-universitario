@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { Resend } from 'resend'
 import { cookies } from 'next/headers'
 import dayjs from 'dayjs'
+import { welcomeTemplate } from '@/lib/email-templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -106,27 +107,7 @@ export async function POST(req: Request) {
       from: 'Refúgio <contato@refugiouniversitario.com.br>',
       to: [email],
       subject: `Você foi convidado para o Refúgio Universitário!`,
-      html: `
-      <html>
-        <head>
-          <title>Bem-Vindo ao Refúgio Universitário</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 20px auto; background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-            <tr>
-              <td>
-                <h1 style="color: #333; font-size: 24px;">Você foi convidado para o Refúgio Universitário!</h1>
-                <img src="https://www.refugiouniversitario.com.br/_next/image?url=%2Frefugio-universitario.png&w=1200&q=75" alt="Refúgio Universitário" style="display: block; margin: 0 auto 20px; max-width:100%; margin-bottom: 30px;">
-                <p style="color: #555; font-size: 18px; line-height: 1.3">Olá ${firstName},</p>
-                <p style="color: #555; font-size: 18px; line-height: 1.3;">Você foi convidado para se juntar à plataforma Refúgio Universitário. Por favor, clique no link abaixo para completar seu cadastro e acessar a plataforma.</p>
-                <p style="width: 100%; margin: auto;"><a href="${process.env.NEXTAUTH_URL}/signup" style="display: block; padding: 15px 30px; margin: 20px auto; background-color: #A046F5; color: #fff; text-decoration: none; text-align: center; border-radius: 5px; font-size: 18px;">Completar Cadastro</a></p>
-                <p style="color: #555; font-size: 18px; line-height: 1.3">Atenciosamente,<br>Equipe Refúgio</p>
-              </td>
-            </tr>
-          </table>
-        </body>
-      </html>
-      `,
+      html: welcomeTemplate(firstName),
     })
 
     console.log('Email sent')
