@@ -138,7 +138,7 @@ export default function EventContent({ initialEventData, initialUserData, id }: 
                 ) : !session ? (
                    <div className="bg-yellow-50 p-6 border border-yellow-200 rounded-2xl flex flex-col items-center text-center">
                      <p className="mb-4 text-yellow-800 font-medium text-lg">Para confirmar sua presença, faça login na sua conta.</p>
-                     <Link href="/signup" className="px-8 py-3 bg-zinc-900 text-white rounded-full font-bold hover:bg-zinc-800 transition-colors shadow-lg">
+                     <Link href={`/signup?callbackUrl=/evento/${id}`} className="px-8 py-3 bg-zinc-900 text-white rounded-full font-bold hover:bg-zinc-800 transition-colors shadow-lg">
                        Fazer Login
                      </Link>
                    </div>

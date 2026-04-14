@@ -21,9 +21,9 @@ const adminCreateUserSchema = z.object({
 
 const signupPreRegisterSchema = z.object({
   name: z.string(),
-  username: z.string(),
   course: z.string(),
   education_level: z.string(),
+  cellphone: z.string(),
 })
 
 export async function POST(req: Request) {
@@ -33,9 +33,13 @@ export async function POST(req: Request) {
     console.log('Request body:', body)
 
     // Fluxo 1: pré-cadastro do signup (sem e-mail ainda)
-    if ('username' in body && !('email' in body)) {
-      const { name, username, course, education_level } =
+    if ('cellphone' in body && !('email' in body)) {
+      const { name, course, education_level, cellphone } =
         signupPreRegisterSchema.parse(body)
+
+      const username = `${name.toLowerCase().trim().replace(/\s+/g, '_')}_${Math.random()
+        .toString(36)
+        .substring(2, 7)}`
 
       const user = await prisma.user.create({
         data: {
@@ -43,6 +47,7 @@ export async function POST(req: Request) {
           username,
           course,
           education_level,
+          cellphone,
         },
       })
 

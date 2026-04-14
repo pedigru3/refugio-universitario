@@ -9,26 +9,16 @@ import { courses } from '@/consts/courses'
 import { educationLevels } from '@/consts/education-levels'
 import { FormAnnotation } from './form-annotation'
 
-import { useRouter, redirect } from 'next/navigation'
+import { useRouter, redirect, useSearchParams } from 'next/navigation'
 import { Button } from './button'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 
 const signUpFormSchema = z.object({
   name: z.string().min(3, { message: 'O nome deve ter ao menos 3 letras' }),
-  username: z
-    .string()
-    .min(3, { message: 'O usuário deve ter ao menos 3 letras' })
-    .regex(/^([a-z\\-]+)$/i, {
-      message: 'O usuário pode ter apenas letras e hífens',
-    })
-    .transform((username) => username.toLowerCase()),
-  course: z
-    .string()
-    .min(3, { message: 'É preciso selecionar uma opção' }),
-  education_level: z
-    .string()
-    .min(3, { message: 'É preciso selecionar uma opção' }),
+  cellphone: z.string().min(10, { message: 'Celular inválido' }),
+  course: z.string().min(3, { message: 'É preciso selecionar uma opção' }),
+  education_level: z.string().min(3, { message: 'É preciso selecionar uma opção' }),
 })
 
 type SignUpFormData = z.infer<typeof signUpFormSchema>
@@ -57,6 +47,7 @@ export function SignUpForm() {
   })
 
   const router = useRouter()
+  const searchParams = useSearchParams()
 
 
   async function handlePreRegister(data: SignUpFormData) {
@@ -65,13 +56,14 @@ export function SignUpForm() {
         method: 'post',
         body: JSON.stringify({
           name: data.name,
-          username: data.username,
+          cellphone: data.cellphone,
           course: data.course,
           education_level: data.education_level,
         }),
       })
       if (result.ok) {
-        router.push('/signup/connect-google')
+        const callbackUrl = searchParams.get('callbackUrl')
+        router.push(`/signup/connect-google${callbackUrl ? `?callbackUrl=${callbackUrl}` : ''}`)
       } else {
         const message = await result.json()
         setErrorRequest(message.error)
@@ -94,8 +86,8 @@ export function SignUpForm() {
     >
       <Input placeholder="Nome" register={register('name')} />
       <FormAnnotation annotation={errors.name?.message} />
-      <Input placeholder="Usuário" register={register('username')} />
-      <FormAnnotation annotation={errors.username?.message} />
+      <Input placeholder="Celular" register={register('cellphone')} />
+      <FormAnnotation annotation={errors.cellphone?.message} />
       <CustomSelect
         placeholder="Curso ou área de interesse"
         options={courses.map((course) => ({ value: course, label: course }))}

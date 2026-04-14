@@ -31,7 +31,8 @@ export default function SignUp() {
           isLoading={googleLoading}
           onClick={async () => {
             setGoogleLoading(true)
-            await signIn('google')
+            const callbackUrl = searchParams.get('callbackUrl') || '/agendamento'
+            await signIn('google', { callbackUrl })
           }}
         >
           {'Conectar ao Google Calendar ->'}
@@ -51,7 +52,8 @@ export default function SignUp() {
               email: session.data?.user.email,
             }),
           })
-          router.push('/signup/connect-google/success')
+          const callbackUrl = searchParams.get('callbackUrl')
+          router.push(callbackUrl || '/signup/connect-google/success')
         }}
       >
         Finalizar

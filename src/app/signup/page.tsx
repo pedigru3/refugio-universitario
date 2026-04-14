@@ -1,9 +1,9 @@
 'use client'
 
 import { SignUpForm } from '@/components/signup-form'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FormAnnotation } from '@/components/form-annotation'
 import { useState, useEffect } from 'react'
 
@@ -11,6 +11,15 @@ export default function SignUp() {
   const [showForm, setShowForm] = useState(false)
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
+  const { status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      const callbackUrl = searchParams.get('callbackUrl') || '/'
+      router.push(callbackUrl)
+    }
+  }, [status, router, searchParams])
 
   useEffect(() => {
     if (error === 'unregistered') {
@@ -20,7 +29,8 @@ export default function SignUp() {
 
   async function handleSignIn() {
     try {
-      await signIn('google')
+      const callbackUrl = searchParams.get('callbackUrl') || '/agendamento'
+      await signIn('google', { callbackUrl })
     } catch (error) {
       console.log(error)
       throw Error('erro')
