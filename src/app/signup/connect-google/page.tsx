@@ -35,11 +35,11 @@ export default function SignUp() {
             await signIn('google', { callbackUrl })
           }}
         >
-          {'Conectar ao Google Calendar ->'}
+          {'Conectar conta Google ->'}
         </Button>
       )}
       {hasError && (
-        <FormAnnotation annotation="Não foi possível se conectar ao Google. Todas as permissões foram aceitas?" />
+        <FormAnnotation annotation="Não foi possível se conectar ao Google. Tente novamente." />
       )}
       <Button
         disabled={!isSignIn}

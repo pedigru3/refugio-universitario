@@ -18,11 +18,8 @@ export const authOptions: NextAuthOptions = {
       },
       authorization: {
         params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
           scope:
-            'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
         },
       },
       profile(profile: GoogleProfile) {
@@ -52,12 +49,6 @@ export const authOptions: NextAuthOptions = {
       // Se existe pré-cadastro em cookie, permite prosseguir direto
       if (pendingUser) {
         return true
-      }
-
-      if (
-        !account?.scope?.includes('https://www.googleapis.com/auth/calendar')
-      ) {
-        return '/signup/connect-google/?error=permissions'
       }
 
       if (account?.provider === 'google' && profile?.email) {

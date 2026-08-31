@@ -36,10 +36,12 @@ export async function GET() {
     const manualIsOpen = map[CONFIG_KEYS.isOpen] !== 'false'
     const MAX_CAPACITY = Number(map[CONFIG_KEYS.maxCapacity]) || 20
 
-    // 2. Buscar horários de funcionamento para hoje
-    const schedule = await prisma.availableSchedule.findFirst({
-      where: { week_day: currentWeekDay },
+    // 2. Buscar horários de funcionamento
+    const allSchedules = await prisma.availableSchedule.findMany({
+      orderBy: { week_day: 'asc' },
     })
+
+    const schedule = allSchedules.find((s) => s.week_day === currentWeekDay)
 
     let isWithinBusinessHours = false
     if (schedule) {
@@ -51,7 +53,97 @@ export async function GET() {
     // 3. Status Final: Aberto se (Manual AND Horário Comercial)
     const isOpen = manualIsOpen && isWithinBusinessHours
 
-    // 4. Calcular Lotação Automática
+    // 4. Calcular próximo evento (fecha em / abre em)
+    let nextEvent: {
+      type: 'closes' | 'opens' | 'none'
+      title: string
+      targetTime: string | null
+      targetLabel: string | null
+    } = {
+      type: 'none',
+      title: 'Sem horário',
+      targetTime: null,
+      targetLabel: null,
+    }
+
+    if (isOpen && schedule) {
+      const closeTarget = now
+        .startOf('day')
+        .add(schedule.time_end_in_minutes, 'minute')
+      const closeHours = Math.floor(schedule.time_end_in_minutes / 60)
+        .toString()
+        .padStart(2, '0')
+      const closeMins = (schedule.time_end_in_minutes % 60)
+        .toString()
+        .padStart(2, '0')
+
+      nextEvent = {
+        type: 'closes',
+        title: 'Fecha em',
+        targetTime: closeTarget.toISOString(),
+        targetLabel: `Hoje às ${closeHours}:${closeMins}`,
+      }
+    } else if (!manualIsOpen) {
+      nextEvent = {
+        type: 'none',
+        title: 'Fechado',
+        targetTime: null,
+        targetLabel: 'Fechado temporariamente',
+      }
+    } else {
+      // Aberto hoje mais tarde?
+      if (schedule && currentMinutes < schedule.time_start_in_minutes) {
+        const openTarget = now
+          .startOf('day')
+          .add(schedule.time_start_in_minutes, 'minute')
+        const openHours = Math.floor(schedule.time_start_in_minutes / 60)
+          .toString()
+          .padStart(2, '0')
+        const openMins = (schedule.time_start_in_minutes % 60)
+          .toString()
+          .padStart(2, '0')
+
+        nextEvent = {
+          type: 'opens',
+          title: 'Abre em',
+          targetTime: openTarget.toISOString(),
+          targetLabel: `Hoje às ${openHours}:${openMins}`,
+        }
+      } else if (allSchedules.length > 0) {
+        // Procurar nos próximos 7 dias
+        for (let i = 1; i <= 7; i++) {
+          const targetWeekDay = (currentWeekDay + i) % 7
+          const nextSched = allSchedules.find((s) => s.week_day === targetWeekDay)
+          if (nextSched) {
+            const openTarget = now
+              .add(i, 'day')
+              .startOf('day')
+              .add(nextSched.time_start_in_minutes, 'minute')
+            const openHours = Math.floor(nextSched.time_start_in_minutes / 60)
+              .toString()
+              .padStart(2, '0')
+            const openMins = (nextSched.time_start_in_minutes % 60)
+              .toString()
+              .padStart(2, '0')
+
+            const dayName =
+              i === 1
+                ? 'Amanhã'
+                : openTarget.locale('pt-br').format('dddd')
+
+            nextEvent = {
+              type: 'opens',
+              title: 'Abre em',
+              targetTime: openTarget.toISOString(),
+              targetLabel: `${dayName} às ${openHours}:${openMins}`,
+            }
+            break
+          }
+        }
+      }
+    }
+
+    // 5. Calcular Lotação Automática
     // Buscamos agendamentos que coincidam com a hora atual
     const currentHourStart = now.startOf('hour').toISOString()
     const nextHourStart = now.add(1, 'hour').startOf('hour').toISOString()
@@ -77,6 +169,7 @@ export async function GET() {
       isOpen,
       capacityLevel: isOpen ? autoCapacityLevel : 0,
       isManualClosed: !manualIsOpen,
+      nextEvent,
       debug: {
         activeBookingsCount,
         MAX_CAPACITY,

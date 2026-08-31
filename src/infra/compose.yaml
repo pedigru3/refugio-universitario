@@ -1,7 +1,15 @@
+name: refugio-infra
+
 services:
   database:
+    container_name: refugio_database
     image: "postgres:16.0-alpine3.18"
     env_file:
       - ../../.env
     ports:
       - "5435:5432"
+    volumes:
+      - refugio_pgdata:/var/lib/postgresql/data
+
+volumes:
+  refugio_pgdata:

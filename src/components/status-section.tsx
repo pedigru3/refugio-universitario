@@ -15,15 +15,24 @@ const CAPACITY_COLORS = [
   { text: 'text-rose-300', bar: 'bg-rose-300' },
 ] as const
 
+type NextEvent = {
+  type: 'closes' | 'opens' | 'none'
+  title: string
+  targetTime: string | null
+  targetLabel: string | null
+}
+
 type SystemStatusResponse = {
   isOpen: boolean
   capacityLevel: number
+  nextEvent?: NextEvent
 }
 
 export function StatusSection() {
   const [time, setTime] = useState<dayjs.Dayjs | null>(null)
   const [isOpen, setIsOpen] = useState<boolean | null>(null)
   const [capacityLevel, setCapacityLevel] = useState<number | null>(null)
+  const [nextEvent, setNextEvent] = useState<NextEvent | null>(null)
 
   useEffect(() => {
     async function fetchStatus() {
@@ -32,6 +41,9 @@ export function StatusSection() {
         const data: SystemStatusResponse = await res.json()
         setIsOpen(data.isOpen)
         setCapacityLevel(data.capacityLevel)
+        if (data.nextEvent) {
+          setNextEvent(data.nextEvent)
+        }
       } catch (error) {
         console.error('Failed to fetch status', error)
       }
@@ -50,6 +62,34 @@ export function StatusSection() {
       clearInterval(statusInterval)
     }
   }, [])
+
+  const getCountdown = () => {
+    if (!nextEvent?.targetTime) {
+      return nextEvent?.targetLabel || '--:--:--'
+    }
+
+    const target = dayjs(nextEvent.targetTime)
+    const diffMs = target.diff(dayjs())
+
+    if (diffMs <= 0) {
+      return '00m 00s'
+    }
+
+    const totalSeconds = Math.floor(diffMs / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}h ${minutes
+        .toString()
+        .padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`
+    }
+
+    return `${minutes.toString().padStart(2, '0')}m ${seconds
+      .toString()
+      .padStart(2, '0')}s`
+  }
 
   const capacityStyles =
     capacityLevel && capacityLevel > 0
@@ -126,14 +166,15 @@ export function StatusSection() {
           <div className="flex items-center gap-2 text-gray-200 mb-1">
             <Clock size={24} />
             <span className="text-sm font-medium uppercase tracking-wider">
-              Horário Atual
+              {nextEvent?.title || (isOpen ? 'Fecha em' : 'Abre em')}
             </span>
           </div>
-          <div className="text-4xl font-bold font-mono tracking-widest">
-            {time ? time.format('HH:mm:ss') : '--:--:--'}
+          <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight whitespace-nowrap text-center">
+            {getCountdown()}
           </div>
-          <div className="text-sm text-gray-300 mt-1 capitalize">
-            {time ? time.format('dddd, D [de] MMMM') : 'Atualizando...'}
+          <div className="text-sm text-gray-300 mt-1 capitalize text-center truncate max-w-full">
+            {nextEvent?.targetLabel ||
+              (time ? time.format('dddd, D [de] MMMM') : 'Atualizando...')}
           </div>
         </div>
 
