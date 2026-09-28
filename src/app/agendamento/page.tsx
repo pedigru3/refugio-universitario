@@ -2,12 +2,15 @@
 
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import useSWR from 'swr'
+import * as Dialog from '@radix-ui/react-dialog'
 import { Calendar } from '@/components/calendar/calendar'
 import { Container } from '@/components/container'
 import { Loading } from '@/components/loading'
 import { Title } from '@/components/title'
 import { DialogComponent } from '@/components/dialog'
+import { CalendarBlank, Info, X } from '@phosphor-icons/react'
 
 import { TimePickerComponent } from './components/timer-picker'
 import { Button } from '@/components/button'
@@ -15,7 +18,7 @@ import { Button } from '@/components/button'
 import { useSchedule } from '@/hooks/useSchedule'
 
 import dayjs from 'dayjs'
-import { useSearchParams } from 'next/navigation'
+import 'dayjs/locale/pt-br'
 
 export default function Agendamento() {
   const { status, data: dataSession } = useSession({ required: true })
@@ -27,6 +30,7 @@ export default function Agendamento() {
 
   const [isSending, setIsSending] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [hasDismissedOpeningModal, setHasDismissedOpeningModal] = useState(false)
 
   const router = useRouter()
 
@@ -82,6 +86,20 @@ export default function Agendamento() {
     setIsSending(false)
   }
 
+  const { data: systemStatus } = useSWR('/api/v1/system/status', async (url) => {
+    const res = await fetch(url)
+    return res.json()
+  })
+
+  const nextOpeningTarget = systemStatus?.nextEvent?.targetTime
+    ? dayjs(systemStatus.nextEvent.targetTime).locale('pt-br')
+    : null
+
+  const isLongTermClosed =
+    !systemStatus?.isOpen &&
+    nextOpeningTarget &&
+    nextOpeningTarget.diff(dayjs(), 'day') >= 3
+
   if (status === 'loading') {
     return <Loading />
   }
@@ -91,6 +109,7 @@ export default function Agendamento() {
       <Title color="light" type="h2">
         {editId ? 'Editar Agendamento' : 'Agendamento'}
       </Title>
+  
       <div
         className={`mt-6 relative grid grid-cols-1 lg:max-w-[540px]
        max-w-[540px] bg-zinc-800 rounded-md ${
@@ -169,6 +188,70 @@ export default function Agendamento() {
         message="Ops! Algo deu errado. Verifique se já não há uma reserva sua nesse horário."
         onClose={() => setIsAlertOpen(false)}
       />
+
+      <Dialog.Root
+        open={Boolean(isLongTermClosed && !hasDismissedOpeningModal)}
+        onOpenChange={(open) => {
+          if (!open) setHasDismissedOpeningModal(true)
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <Dialog.Content className=" max-w-[440px] bg-zinc-900 border border-purple-500/40 shadow-[0_10px_40px_-10px_rgba(119,5,247,0.35)] rounded-2xl p-6 sm:p-8 text-white focus:outline-none relative">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-5 shadow-lg shadow-purple-950/40">
+                  <CalendarBlank size={36} weight="duotone" />
+                </div>
+
+                <Dialog.Title className="text-2xl font-bold text-white mb-2">
+                  Aviso de Funcionamento
+                </Dialog.Title>
+
+                <div className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl p-4 my-4 text-center shadow-inner">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-purple-300">
+                    Agendamentos disponíveis apenas para:
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white mt-1 font-sans">
+                    {nextOpeningTarget?.format('D [de] MMMM')}
+                  </p>
+                  <p className="text-xs text-purple-200/90 mt-1 font-medium">
+                    {nextOpeningTarget
+                      ? `${
+                          nextOpeningTarget.format('dddd').charAt(0).toUpperCase() +
+                          nextOpeningTarget.format('dddd').slice(1)
+                        } às ${nextOpeningTarget.format('HH:mm')}`
+                      : ''}
+                  </p>
+                </div>
+
+                <Dialog.Description className="text-sm text-zinc-300 leading-relaxed mb-4 mt-1">
+                  Você pode antecipar seus agendamentos selecionando no calendário datas a partir do dia de reabertura.
+                </Dialog.Description>
+
+                <button
+                  type="button"
+                  onClick={() => setHasDismissedOpeningModal(true)}
+                  className="w-full bg-purple-600 hover:bg-purple-500 active:scale-[0.98] text-white font-bold py-3 px-6 rounded-xl transition duration-200 shadow-lg shadow-purple-950/50 cursor-pointer"
+                >
+                  Ok
+                </button>
+              </div>
+
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  onClick={() => setHasDismissedOpeningModal(true)}
+                  className="absolute top-4 right-4 text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                  aria-label="Fechar"
+                >
+                  <X size={20} />
+                </button>
+              </Dialog.Close>
+            </Dialog.Content>
+          </div>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Container>
   )
 }

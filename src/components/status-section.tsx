@@ -63,22 +63,37 @@ export function StatusSection() {
     }
   }, [])
 
+  const targetObj = nextEvent?.targetTime
+    ? dayjs(nextEvent.targetTime).locale('pt-br')
+    : null
+  const diffMs = targetObj ? targetObj.diff(dayjs()) : 0
+  const isLongTerm = targetObj ? diffMs > 3 * 24 * 60 * 60 * 1000 : false
+
   const getCountdown = () => {
-    if (!nextEvent?.targetTime) {
+    if (!nextEvent?.targetTime || !targetObj) {
       return nextEvent?.targetLabel || '--:--:--'
     }
-
-    const target = dayjs(nextEvent.targetTime)
-    const diffMs = target.diff(dayjs())
 
     if (diffMs <= 0) {
       return '00m 00s'
     }
 
     const totalSeconds = Math.floor(diffMs / 1000)
-    const hours = Math.floor(totalSeconds / 3600)
+    const days = Math.floor(totalSeconds / 86400)
+    const hours = Math.floor((totalSeconds % 86400) / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
+
+    // Se for mais de 3 dias, mostra apenas o dia e mês em português (ex: "12 de outubro")
+    if (days >= 3) {
+      return targetObj.format('D [de] MMMM')
+    }
+
+    if (days > 0) {
+      return `${days}d ${hours.toString().padStart(2, '0')}h ${minutes
+        .toString()
+        .padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`
+    }
 
     if (hours > 0) {
       return `${hours.toString().padStart(2, '0')}h ${minutes
@@ -89,6 +104,24 @@ export function StatusSection() {
     return `${minutes.toString().padStart(2, '0')}m ${seconds
       .toString()
       .padStart(2, '0')}s`
+  }
+
+  const getSubtitle = () => {
+    if (!nextEvent?.targetTime || !targetObj) {
+      return time ? time.format('dddd, D [de] MMMM') : 'Atualizando...'
+    }
+
+    const totalSeconds = Math.floor(diffMs / 1000)
+    const days = Math.floor(totalSeconds / 86400)
+
+    if (days >= 3) {
+      return targetObj.format('dddd [às] HH:mm')
+    }
+
+    return (
+      nextEvent?.targetLabel ||
+      (time ? time.format('dddd, D [de] MMMM') : 'Atualizando...')
+    )
   }
 
   const capacityStyles =
@@ -169,12 +202,15 @@ export function StatusSection() {
               {nextEvent?.title || (isOpen ? 'Fecha em' : 'Abre em')}
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight whitespace-nowrap text-center">
+          <div
+            className={`text-2xl sm:text-3xl font-bold whitespace-nowrap text-center ${
+              isLongTerm ? 'font-sans' : 'font-mono tracking-tight'
+            }`}
+          >
             {getCountdown()}
           </div>
           <div className="text-sm text-gray-300 mt-1 capitalize text-center truncate max-w-full">
-            {nextEvent?.targetLabel ||
-              (time ? time.format('dddd, D [de] MMMM') : 'Atualizando...')}
+            {getSubtitle()}
           </div>
         </div>
 

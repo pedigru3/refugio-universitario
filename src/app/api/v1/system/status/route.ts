@@ -3,9 +3,11 @@ import { NextResponse } from 'next/server'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import 'dayjs/locale/pt-br'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.locale('pt-br')
 
 const CONFIG_KEYS = {
   isOpen: 'isOpen',
@@ -36,21 +38,72 @@ export async function GET() {
     const manualIsOpen = map[CONFIG_KEYS.isOpen] !== 'false'
     const MAX_CAPACITY = Number(map[CONFIG_KEYS.maxCapacity]) || 20
 
-    // 2. Buscar horários de funcionamento
-    const allSchedules = await prisma.availableSchedule.findMany({
-      orderBy: { week_day: 'asc' },
-    })
+    // 2. Buscar horários de funcionamento e datas bloqueadas
+    const [allSchedules, blockedDatesList] = await Promise.all([
+      prisma.availableSchedule.findMany({
+        orderBy: { week_day: 'asc' },
+      }),
+      prisma.blockedDates.findMany(),
+    ])
 
-    const schedule = allSchedules.find((s) => s.week_day === currentWeekDay)
+    const blockedDatesSet = new Set(
+      blockedDatesList.map((b) =>
+        dayjs(b.date).tz('America/Sao_Paulo').format('YYYY-MM-DD'),
+      ),
+    )
 
-    let isWithinBusinessHours = false
-    if (schedule) {
-      isWithinBusinessHours =
-        currentMinutes >= schedule.time_start_in_minutes &&
-        currentMinutes < schedule.time_end_in_minutes
+    const isOperatingDay = (dateObj: dayjs.Dayjs) => {
+      const weekDay = dateObj.day()
+      const dateStr = dateObj.format('YYYY-MM-DD')
+
+      // 1. Está bloqueado manualmente?
+      if (blockedDatesSet.has(dateStr)) {
+        return { valid: false, reason: 'blocked_date' as const }
+      }
+
+      // 2. Tem horário cadastrado para este dia da semana?
+      const sched = allSchedules.find((s) => s.week_day === weekDay)
+      if (!sched) {
+        return { valid: false, reason: 'no_schedule_weekday' as const }
+      }
+
+      // 3. Está antes do start_day?
+      if (sched.start_day) {
+        const startDayObj = dayjs(sched.start_day)
+          .tz('America/Sao_Paulo')
+          .startOf('day')
+        if (dateObj.startOf('day').isBefore(startDayObj)) {
+          return {
+            valid: false,
+            reason: 'before_start_day' as const,
+            startDayObj,
+          }
+        }
+      }
+
+      // 4. Está depois do final_day?
+      if (sched.final_day) {
+        const finalDayObj = dayjs(sched.final_day)
+          .tz('America/Sao_Paulo')
+          .endOf('day')
+        if (dateObj.startOf('day').isAfter(finalDayObj)) {
+          return { valid: false, reason: 'after_final_day' as const }
+        }
+      }
+
+      return { valid: true, schedule: sched }
     }
 
-    // 3. Status Final: Aberto se (Manual AND Horário Comercial)
+    const todayCheck = isOperatingDay(now)
+    let isWithinBusinessHours = false
+
+    if (todayCheck.valid && todayCheck.schedule) {
+      isWithinBusinessHours =
+        currentMinutes >= todayCheck.schedule.time_start_in_minutes &&
+        currentMinutes < todayCheck.schedule.time_end_in_minutes
+    }
+
+    // 3. Status Final: Aberto se (Manual AND Horário Comercial AND Data Válida)
     const isOpen = manualIsOpen && isWithinBusinessHours
 
     // 4. Calcular próximo evento (fecha em / abre em)
@@ -63,17 +116,19 @@ export async function GET() {
       type: 'none',
       title: 'Sem horário',
       targetTime: null,
-      targetLabel: null,
+      targetLabel: 'Sem previsão de abertura',
     }
 
-    if (isOpen && schedule) {
+    if (isOpen && todayCheck.valid && todayCheck.schedule) {
       const closeTarget = now
         .startOf('day')
-        .add(schedule.time_end_in_minutes, 'minute')
-      const closeHours = Math.floor(schedule.time_end_in_minutes / 60)
+        .add(todayCheck.schedule.time_end_in_minutes, 'minute')
+      const closeHours = Math.floor(
+        todayCheck.schedule.time_end_in_minutes / 60,
+      )
         .toString()
         .padStart(2, '0')
-      const closeMins = (schedule.time_end_in_minutes % 60)
+      const closeMins = (todayCheck.schedule.time_end_in_minutes % 60)
         .toString()
         .padStart(2, '0')
 
@@ -92,14 +147,20 @@ export async function GET() {
       }
     } else {
       // Aberto hoje mais tarde?
-      if (schedule && currentMinutes < schedule.time_start_in_minutes) {
+      if (
+        todayCheck.valid &&
+        todayCheck.schedule &&
+        currentMinutes < todayCheck.schedule.time_start_in_minutes
+      ) {
         const openTarget = now
           .startOf('day')
-          .add(schedule.time_start_in_minutes, 'minute')
-        const openHours = Math.floor(schedule.time_start_in_minutes / 60)
+          .add(todayCheck.schedule.time_start_in_minutes, 'minute')
+        const openHours = Math.floor(
+          todayCheck.schedule.time_start_in_minutes / 60,
+        )
           .toString()
           .padStart(2, '0')
-        const openMins = (schedule.time_start_in_minutes % 60)
+        const openMins = (todayCheck.schedule.time_start_in_minutes % 60)
           .toString()
           .padStart(2, '0')
 
@@ -110,32 +171,43 @@ export async function GET() {
           targetLabel: `Hoje às ${openHours}:${openMins}`,
         }
       } else if (allSchedules.length > 0) {
-        // Procurar nos próximos 7 dias
-        for (let i = 1; i <= 7; i++) {
-          const targetWeekDay = (currentWeekDay + i) % 7
-          const nextSched = allSchedules.find((s) => s.week_day === targetWeekDay)
-          if (nextSched) {
-            const openTarget = now
-              .add(i, 'day')
+        // Procurar nos próximos 365 dias
+        for (let i = 1; i <= 365; i++) {
+          const candidateDate = now.add(i, 'day')
+          const check = isOperatingDay(candidateDate)
+
+          if (check.valid && check.schedule) {
+            const openTarget = candidateDate
               .startOf('day')
-              .add(nextSched.time_start_in_minutes, 'minute')
-            const openHours = Math.floor(nextSched.time_start_in_minutes / 60)
+              .add(check.schedule.time_start_in_minutes, 'minute')
+            const openHours = Math.floor(
+              check.schedule.time_start_in_minutes / 60,
+            )
               .toString()
               .padStart(2, '0')
-            const openMins = (nextSched.time_start_in_minutes % 60)
+            const openMins = (check.schedule.time_start_in_minutes % 60)
               .toString()
               .padStart(2, '0')
 
-            const dayName =
-              i === 1
-                ? 'Amanhã'
-                : openTarget.locale('pt-br').format('dddd')
+            let targetLabel = ''
+            if (i === 1) {
+              targetLabel = `Amanhã às ${openHours}:${openMins}`
+            } else if (i < 7) {
+              const dayName = candidateDate.locale('pt-br').format('dddd')
+              targetLabel = `${dayName} às ${openHours}:${openMins}`
+            } else {
+              const formattedDate = candidateDate
+                .locale('pt-br')
+                .format('D [de] MMMM')
+              const dayName = candidateDate.locale('pt-br').format('dddd')
+              targetLabel = `${formattedDate} (${dayName}) às ${openHours}:${openMins}`
+            }
 
             nextEvent = {
               type: 'opens',
               title: 'Abre em',
               targetTime: openTarget.toISOString(),
-              targetLabel: `${dayName} às ${openHours}:${openMins}`,
+              targetLabel,
             }
             break
           }
